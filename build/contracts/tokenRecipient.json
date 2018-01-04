@@ -32,14 +32,14 @@
   "deployedBytecode": "0x",
   "sourceMap": "",
   "deployedSourceMap": "",
-  "source": "pragma solidity ^0.4.16;\n\ninterface tokenRecipient { function receiveApproval(address _from, uint256 _value, address _token, bytes _extraData) public; }\n\ncontract GladiusToken {\n    // Public variables of the token\n    string public name;\n    string public symbol;\n    uint8 public decimals = 8;\n    // 18 decimals is the strongly suggested default, avoid changing it\n    uint256 public totalSupply;\n\n    // This creates an array with all balances\n    mapping (address => uint256) public balanceOf;\n    mapping (address => mapping (address => uint256)) public allowance;\n\n    // This generates a public event on the blockchain that will notify clients\n    event Transfer(address indexed from, address indexed to, uint256 value);\n\n    // This notifies clients about the amount burnt\n    event Burn(address indexed from, uint256 value);\n\n    /**\n     * Constrctor function\n     *\n     * Initializes contract with initial supply tokens to the creator of the contract\n     */\n    function GladiusToken(\n        uint256 initialSupply,\n        string tokenName,\n        string tokenSymbol\n    ) public {\n        totalSupply = initialSupply * 10 ** uint256(decimals);  // Update total supply with the decimal amount\n        balanceOf[msg.sender] = totalSupply;                // Give the creator all initial tokens\n        name = tokenName;                                   // Set the name for display purposes\n        symbol = tokenSymbol;                               // Set the symbol for display purposes\n    }\n\n    /**\n     * Internal transfer, only can be called by this contract\n     */\n    function _transfer(address _from, address _to, uint _value) internal {\n        // Prevent transfer to 0x0 address. Use burn() instead\n        require(_to != 0x0);\n        // Check if the sender has enough\n        require(balanceOf[_from] >= _value);\n        // Check for overflows\n        require(balanceOf[_to] + _value > balanceOf[_to]);\n        // Save this for an assertion in the future\n        uint previousBalances = balanceOf[_from] + balanceOf[_to];\n        // Subtract from the sender\n        balanceOf[_from] -= _value;\n        // Add the same to the recipient\n        balanceOf[_to] += _value;\n        Transfer(_from, _to, _value);\n        // Asserts are used to use static analysis to find bugs in your code. They should never fail\n        assert(balanceOf[_from] + balanceOf[_to] == previousBalances);\n    }\n\n    /**\n     * Transfer tokens\n     *\n     * Send `_value` tokens to `_to` from your account\n     *\n     * @param _to The address of the recipient\n     * @param _value the amount to send\n     */\n    function transfer(address _to, uint256 _value) public {\n        _transfer(msg.sender, _to, _value);\n    }\n\n    /**\n     * Transfer tokens from other address\n     *\n     * Send `_value` tokens to `_to` in behalf of `_from`\n     *\n     * @param _from The address of the sender\n     * @param _to The address of the recipient\n     * @param _value the amount to send\n     */\n    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {\n        require(_value <= allowance[_from][msg.sender]);     // Check allowance\n        allowance[_from][msg.sender] -= _value;\n        _transfer(_from, _to, _value);\n        return true;\n    }\n\n    /**\n     * Set allowance for other address\n     *\n     * Allows `_spender` to spend no more than `_value` tokens in your behalf\n     *\n     * @param _spender The address authorized to spend\n     * @param _value the max amount they can spend\n     */\n    function approve(address _spender, uint256 _value) public\n        returns (bool success) {\n        allowance[msg.sender][_spender] = _value;\n        return true;\n    }\n\n    /**\n     * Set allowance for other address and notify\n     *\n     * Allows `_spender` to spend no more than `_value` tokens in your behalf, and then ping the contract about it\n     *\n     * @param _spender The address authorized to spend\n     * @param _value the max amount they can spend\n     * @param _extraData some extra information to send to the approved contract\n     */\n    function approveAndCall(address _spender, uint256 _value, bytes _extraData)\n        public\n        returns (bool success) {\n        tokenRecipient spender = tokenRecipient(_spender);\n        if (approve(_spender, _value)) {\n            spender.receiveApproval(msg.sender, _value, this, _extraData);\n            return true;\n        }\n    }\n\n    /**\n     * Destroy tokens\n     *\n     * Remove `_value` tokens from the system irreversibly\n     *\n     * @param _value the amount of money to burn\n     */\n    function burn(uint256 _value) public returns (bool success) {\n        require(balanceOf[msg.sender] >= _value);   // Check if the sender has enough\n        balanceOf[msg.sender] -= _value;            // Subtract from the sender\n        totalSupply -= _value;                      // Updates totalSupply\n        Burn(msg.sender, _value);\n        return true;\n    }\n\n    /**\n     * Destroy tokens from other account\n     *\n     * Remove `_value` tokens from the system irreversibly on behalf of `_from`.\n     *\n     * @param _from the address of the sender\n     * @param _value the amount of money to burn\n     */\n    function burnFrom(address _from, uint256 _value) public returns (bool success) {\n        require(balanceOf[_from] >= _value);                // Check if the targeted balance is enough\n        require(_value <= allowance[_from][msg.sender]);    // Check allowance\n        balanceOf[_from] -= _value;                         // Subtract from the targeted balance\n        allowance[_from][msg.sender] -= _value;             // Subtract from the sender's allowance\n        totalSupply -= _value;                              // Update totalSupply\n        Burn(_from, _value);\n        return true;\n    }\n\n\n    /* Creates tokens*/\n    function createToken(uint256 amount) public {\n        totalSupply += amount;\n    }\n\n\n\n}\n",
+  "source": "pragma solidity ^0.4.16;\n\ninterface tokenRecipient { function receiveApproval(address _from, uint256 _value, address _token, bytes _extraData) public; }\n\ncontract GladiusToken {\n    // Public variables of the token\n    string public name;\n    string public symbol;\n    uint8 public decimals = 8;\n    // 18 decimals is the strongly suggested default, avoid changing it\n    uint256 public totalSupply;\n\n    // This creates an array with all balances\n    mapping (address => uint256) public balanceOf;\n    mapping (address => mapping (address => uint256)) public allowance;\n\n    // This generates a public event on the blockchain that will notify clients\n    event Transfer(address indexed from, address indexed to, uint256 value);\n\n    // This notifies clients about the amount burnt\n    event Burn(address indexed from, uint256 value);\n\n    /**\n     * Constrctor function\n     *\n     * Initializes contract with initial supply tokens to the creator of the contract\n     */\n    function GladiusToken(\n        uint256 initialSupply,\n        string tokenName,\n        string tokenSymbol\n    ) public {\n        totalSupply = initialSupply * 10 ** uint256(decimals);  // Update total supply with the decimal amount\n        balanceOf[msg.sender] = totalSupply;                // Give the creator all initial tokens\n        name = tokenName;                                   // Set the name for display purposes\n        symbol = tokenSymbol;                               // Set the symbol for display purposes\n    }\n\n    /**\n     * Internal transfer, only can be called by this contract\n     */\n    function _transfer(address _from, address _to, uint _value) internal {\n        // Prevent transfer to 0x0 address. Use burn() instead\n        require(_to != 0x0);\n        // Check if the sender has enough\n        require(balanceOf[_from] >= _value);\n        // Check for overflows\n        require(balanceOf[_to] + _value > balanceOf[_to]);\n        // Save this for an assertion in the future\n        uint previousBalances = balanceOf[_from] + balanceOf[_to];\n        // Subtract from the sender\n        balanceOf[_from] -= _value;\n        // Add the same to the recipient\n        balanceOf[_to] += _value;\n        Transfer(_from, _to, _value);\n        // Asserts are used to use static analysis to find bugs in your code. They should never fail\n        assert(balanceOf[_from] + balanceOf[_to] == previousBalances);\n    }\n\n    /**\n     * Transfer tokens\n     *\n     * Send `_value` tokens to `_to` from your account\n     *\n     * @param _to The address of the recipient\n     * @param _value the amount to send\n     */\n    function transfer(address _to, uint256 _value) public {\n        _transfer(msg.sender, _to, _value);\n    }\n\n    /**\n     * Transfer tokens from other address\n     *\n     * Send `_value` tokens to `_to` in behalf of `_from`\n     *\n     * @param _from The address of the sender\n     * @param _to The address of the recipient\n     * @param _value the amount to send\n     */\n    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {\n        require(_value <= allowance[_from][msg.sender]);     // Check allowance\n        allowance[_from][msg.sender] -= _value;\n        _transfer(_from, _to, _value);\n        return true;\n    }\n\n    /**\n     * Set allowance for other address\n     *\n     * Allows `_spender` to spend no more than `_value` tokens in your behalf\n     *\n     * @param _spender The address authorized to spend\n     * @param _value the max amount they can spend\n     */\n    function approve(address _spender, uint256 _value) public\n        returns (bool success) {\n        allowance[msg.sender][_spender] = _value;\n        return true;\n    }\n\n    /**\n     * Set allowance for other address and notify\n     *\n     * Allows `_spender` to spend no more than `_value` tokens in your behalf, and then ping the contract about it\n     *\n     * @param _spender The address authorized to spend\n     * @param _value the max amount they can spend\n     * @param _extraData some extra information to send to the approved contract\n     */\n    function approveAndCall(address _spender, uint256 _value, bytes _extraData)\n        public\n        returns (bool success) {\n        tokenRecipient spender = tokenRecipient(_spender);\n        if (approve(_spender, _value)) {\n            spender.receiveApproval(msg.sender, _value, this, _extraData);\n            return true;\n        }\n    }\n\n    /**\n     * Destroy tokens\n     *\n     * Remove `_value` tokens from the system irreversibly\n     *\n     * @param _value the amount of money to burn\n     */\n    function burn(uint256 _value) public returns (bool success) {\n        require(balanceOf[msg.sender] >= _value);   // Check if the sender has enough\n        balanceOf[msg.sender] -= _value;            // Subtract from the sender\n        totalSupply -= _value;                      // Updates totalSupply\n        Burn(msg.sender, _value);\n        return true;\n    }\n\n    /**\n     * Destroy tokens from other account\n     *\n     * Remove `_value` tokens from the system irreversibly on behalf of `_from`.\n     *\n     * @param _from the address of the sender\n     * @param _value the amount of money to burn\n     */\n    function burnFrom(address _from, uint256 _value) public returns (bool success) {\n        require(balanceOf[_from] >= _value);                // Check if the targeted balance is enough\n        require(_value <= allowance[_from][msg.sender]);    // Check allowance\n        balanceOf[_from] -= _value;                         // Subtract from the targeted balance\n        allowance[_from][msg.sender] -= _value;             // Subtract from the sender's allowance\n        totalSupply -= _value;                              // Update totalSupply\n        Burn(_from, _value);\n        return true;\n    }\n\n\n    /* Creates tokens*/\n    function createToken(uint256 amount) public {\n        totalSupply += amount;\n        balanceOf[msg.sender] += amount;\n    }\n\n\n\n}\n",
   "sourcePath": "/Users/marcelom/Developer/solidity-experiments/gladius-contract-marketplace/contracts/GladiusToken.sol",
   "ast": {
     "attributes": {
       "absolutePath": "/Users/marcelom/Developer/solidity-experiments/gladius-contract-marketplace/contracts/GladiusToken.sol",
       "exportedSymbols": {
         "GladiusToken": [
-          371
+          378
         ],
         "tokenRecipient": [
           13
@@ -75,7 +75,7 @@
             13
           ],
           "name": "tokenRecipient",
-          "scope": 372
+          "scope": 379
         },
         "children": [
           {
@@ -239,17 +239,17 @@
           "documentation": null,
           "fullyImplemented": true,
           "linearizedBaseContracts": [
-            371
+            378
           ],
           "name": "GladiusToken",
-          "scope": 372
+          "scope": 379
         },
         "children": [
           {
             "attributes": {
               "constant": false,
               "name": "name",
-              "scope": 371,
+              "scope": 378,
               "stateVariable": true,
               "storageLocation": "default",
               "type": "string storage ref",
@@ -275,7 +275,7 @@
             "attributes": {
               "constant": false,
               "name": "symbol",
-              "scope": 371,
+              "scope": 378,
               "stateVariable": true,
               "storageLocation": "default",
               "type": "string storage ref",
@@ -301,7 +301,7 @@
             "attributes": {
               "constant": false,
               "name": "decimals",
-              "scope": 371,
+              "scope": 378,
               "stateVariable": true,
               "storageLocation": "default",
               "type": "uint8",
@@ -343,7 +343,7 @@
             "attributes": {
               "constant": false,
               "name": "totalSupply",
-              "scope": 371,
+              "scope": 378,
               "stateVariable": true,
               "storageLocation": "default",
               "type": "uint256",
@@ -369,7 +369,7 @@
             "attributes": {
               "constant": false,
               "name": "balanceOf",
-              "scope": 371,
+              "scope": 378,
               "stateVariable": true,
               "storageLocation": "default",
               "type": "mapping(address => uint256)",
@@ -414,7 +414,7 @@
             "attributes": {
               "constant": false,
               "name": "allowance",
-              "scope": 371,
+              "scope": 378,
               "stateVariable": true,
               "storageLocation": "default",
               "type": "mapping(address => mapping(address => uint256))",
@@ -655,7 +655,7 @@
               ],
               "name": "GladiusToken",
               "payable": false,
-              "scope": 371,
+              "scope": 378,
               "stateMutability": "nonpayable",
               "superFunction": null,
               "visibility": "public"
@@ -975,7 +975,7 @@
                                       "overloadedDeclarations": [
                                         null
                                       ],
-                                      "referencedDeclaration": 934,
+                                      "referencedDeclaration": 390,
                                       "type": "msg",
                                       "value": "msg"
                                     },
@@ -1139,7 +1139,7 @@
               ],
               "name": "_transfer",
               "payable": false,
-              "scope": 371,
+              "scope": 378,
               "stateMutability": "nonpayable",
               "superFunction": null,
               "visibility": "internal"
@@ -1271,7 +1271,7 @@
                               "overloadedDeclarations": [
                                 null
                               ],
-                              "referencedDeclaration": 937,
+                              "referencedDeclaration": 393,
                               "type": "function (bool) pure",
                               "value": "require"
                             },
@@ -1368,7 +1368,7 @@
                               "overloadedDeclarations": [
                                 null
                               ],
-                              "referencedDeclaration": 937,
+                              "referencedDeclaration": 393,
                               "type": "function (bool) pure",
                               "value": "require"
                             },
@@ -1491,7 +1491,7 @@
                               "overloadedDeclarations": [
                                 null
                               ],
-                              "referencedDeclaration": 937,
+                              "referencedDeclaration": 393,
                               "type": "function (bool) pure",
                               "value": "require"
                             },
@@ -2077,7 +2077,7 @@
                               "overloadedDeclarations": [
                                 null
                               ],
-                              "referencedDeclaration": 925,
+                              "referencedDeclaration": 381,
                               "type": "function (bool) pure",
                               "value": "assert"
                             },
@@ -2255,7 +2255,7 @@
               ],
               "name": "transfer",
               "payable": false,
-              "scope": 371,
+              "scope": 378,
               "stateMutability": "nonpayable",
               "superFunction": null,
               "visibility": "public"
@@ -2395,7 +2395,7 @@
                                   "overloadedDeclarations": [
                                     null
                                   ],
-                                  "referencedDeclaration": 934,
+                                  "referencedDeclaration": 390,
                                   "type": "msg",
                                   "value": "msg"
                                 },
@@ -2466,7 +2466,7 @@
               ],
               "name": "transferFrom",
               "payable": false,
-              "scope": 371,
+              "scope": 378,
               "stateMutability": "nonpayable",
               "superFunction": null,
               "visibility": "public"
@@ -2620,7 +2620,7 @@
                               "overloadedDeclarations": [
                                 null
                               ],
-                              "referencedDeclaration": 937,
+                              "referencedDeclaration": 393,
                               "type": "function (bool) pure",
                               "value": "require"
                             },
@@ -2728,7 +2728,7 @@
                                           "overloadedDeclarations": [
                                             null
                                           ],
-                                          "referencedDeclaration": 934,
+                                          "referencedDeclaration": 390,
                                           "type": "msg",
                                           "value": "msg"
                                         },
@@ -2845,7 +2845,7 @@
                                       "overloadedDeclarations": [
                                         null
                                       ],
-                                      "referencedDeclaration": 934,
+                                      "referencedDeclaration": 390,
                                       "type": "msg",
                                       "value": "msg"
                                     },
@@ -3030,7 +3030,7 @@
               ],
               "name": "approve",
               "payable": false,
-              "scope": 371,
+              "scope": 378,
               "stateMutability": "nonpayable",
               "superFunction": null,
               "visibility": "public"
@@ -3195,7 +3195,7 @@
                                           "overloadedDeclarations": [
                                             null
                                           ],
-                                          "referencedDeclaration": 934,
+                                          "referencedDeclaration": 390,
                                           "type": "msg",
                                           "value": "msg"
                                         },
@@ -3303,7 +3303,7 @@
               ],
               "name": "approveAndCall",
               "payable": false,
-              "scope": 371,
+              "scope": 378,
               "stateMutability": "nonpayable",
               "superFunction": null,
               "visibility": "public"
@@ -3629,7 +3629,7 @@
                                           "typeString": "uint256"
                                         },
                                         {
-                                          "typeIdentifier": "t_contract$_GladiusToken_$371",
+                                          "typeIdentifier": "t_contract$_GladiusToken_$378",
                                           "typeString": "contract GladiusToken"
                                         },
                                         {
@@ -3683,7 +3683,7 @@
                                           "overloadedDeclarations": [
                                             null
                                           ],
-                                          "referencedDeclaration": 934,
+                                          "referencedDeclaration": 390,
                                           "type": "msg",
                                           "value": "msg"
                                         },
@@ -3716,7 +3716,7 @@
                                       "overloadedDeclarations": [
                                         null
                                       ],
-                                      "referencedDeclaration": 947,
+                                      "referencedDeclaration": 403,
                                       "type": "contract GladiusToken",
                                       "value": "this"
                                     },
@@ -3805,7 +3805,7 @@
               ],
               "name": "burn",
               "payable": false,
-              "scope": 371,
+              "scope": 378,
               "stateMutability": "nonpayable",
               "superFunction": null,
               "visibility": "public"
@@ -3907,7 +3907,7 @@
                               "overloadedDeclarations": [
                                 null
                               ],
-                              "referencedDeclaration": 937,
+                              "referencedDeclaration": 393,
                               "type": "function (bool) pure",
                               "value": "require"
                             },
@@ -3972,7 +3972,7 @@
                                           "overloadedDeclarations": [
                                             null
                                           ],
-                                          "referencedDeclaration": 934,
+                                          "referencedDeclaration": 390,
                                           "type": "msg",
                                           "value": "msg"
                                         },
@@ -4074,7 +4074,7 @@
                                       "overloadedDeclarations": [
                                         null
                                       ],
-                                      "referencedDeclaration": 934,
+                                      "referencedDeclaration": 390,
                                       "type": "msg",
                                       "value": "msg"
                                     },
@@ -4225,7 +4225,7 @@
                                   "overloadedDeclarations": [
                                     null
                                   ],
-                                  "referencedDeclaration": 934,
+                                  "referencedDeclaration": 390,
                                   "type": "msg",
                                   "value": "msg"
                                 },
@@ -4309,7 +4309,7 @@
               ],
               "name": "burnFrom",
               "payable": false,
-              "scope": 371,
+              "scope": 378,
               "stateMutability": "nonpayable",
               "superFunction": null,
               "visibility": "public"
@@ -4437,7 +4437,7 @@
                               "overloadedDeclarations": [
                                 null
                               ],
-                              "referencedDeclaration": 937,
+                              "referencedDeclaration": 393,
                               "type": "function (bool) pure",
                               "value": "require"
                             },
@@ -4560,7 +4560,7 @@
                               "overloadedDeclarations": [
                                 null
                               ],
-                              "referencedDeclaration": 937,
+                              "referencedDeclaration": 393,
                               "type": "function (bool) pure",
                               "value": "require"
                             },
@@ -4668,7 +4668,7 @@
                                           "overloadedDeclarations": [
                                             null
                                           ],
-                                          "referencedDeclaration": 934,
+                                          "referencedDeclaration": 390,
                                           "type": "msg",
                                           "value": "msg"
                                         },
@@ -4865,7 +4865,7 @@
                                       "overloadedDeclarations": [
                                         null
                                       ],
-                                      "referencedDeclaration": 934,
+                                      "referencedDeclaration": 390,
                                       "type": "msg",
                                       "value": "msg"
                                     },
@@ -5083,7 +5083,7 @@
               ],
               "name": "createToken",
               "payable": false,
-              "scope": 371,
+              "scope": 378,
               "stateMutability": "nonpayable",
               "superFunction": null,
               "visibility": "public"
@@ -5095,7 +5095,7 @@
                     "attributes": {
                       "constant": false,
                       "name": "amount",
-                      "scope": 370,
+                      "scope": 377,
                       "stateVariable": false,
                       "storageLocation": "default",
                       "type": "uint256",
@@ -5185,26 +5185,123 @@
                     "id": 368,
                     "name": "ExpressionStatement",
                     "src": "5898:21:0"
+                  },
+                  {
+                    "children": [
+                      {
+                        "attributes": {
+                          "argumentTypes": null,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "operator": "+=",
+                          "type": "uint256"
+                        },
+                        "children": [
+                          {
+                            "attributes": {
+                              "argumentTypes": null,
+                              "isConstant": false,
+                              "isLValue": true,
+                              "isPure": false,
+                              "lValueRequested": true,
+                              "type": "uint256"
+                            },
+                            "children": [
+                              {
+                                "attributes": {
+                                  "argumentTypes": null,
+                                  "overloadedDeclarations": [
+                                    null
+                                  ],
+                                  "referencedDeclaration": 26,
+                                  "type": "mapping(address => uint256)",
+                                  "value": "balanceOf"
+                                },
+                                "id": 369,
+                                "name": "Identifier",
+                                "src": "5929:9:0"
+                              },
+                              {
+                                "attributes": {
+                                  "argumentTypes": null,
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": false,
+                                  "lValueRequested": false,
+                                  "member_name": "sender",
+                                  "referencedDeclaration": null,
+                                  "type": "address"
+                                },
+                                "children": [
+                                  {
+                                    "attributes": {
+                                      "argumentTypes": null,
+                                      "overloadedDeclarations": [
+                                        null
+                                      ],
+                                      "referencedDeclaration": 390,
+                                      "type": "msg",
+                                      "value": "msg"
+                                    },
+                                    "id": 370,
+                                    "name": "Identifier",
+                                    "src": "5939:3:0"
+                                  }
+                                ],
+                                "id": 371,
+                                "name": "MemberAccess",
+                                "src": "5939:10:0"
+                              }
+                            ],
+                            "id": 372,
+                            "name": "IndexAccess",
+                            "src": "5929:21:0"
+                          },
+                          {
+                            "attributes": {
+                              "argumentTypes": null,
+                              "overloadedDeclarations": [
+                                null
+                              ],
+                              "referencedDeclaration": 362,
+                              "type": "uint256",
+                              "value": "amount"
+                            },
+                            "id": 373,
+                            "name": "Identifier",
+                            "src": "5954:6:0"
+                          }
+                        ],
+                        "id": 374,
+                        "name": "Assignment",
+                        "src": "5929:31:0"
+                      }
+                    ],
+                    "id": 375,
+                    "name": "ExpressionStatement",
+                    "src": "5929:31:0"
                   }
                 ],
-                "id": 369,
+                "id": 376,
                 "name": "Block",
-                "src": "5888:38:0"
+                "src": "5888:79:0"
               }
             ],
-            "id": 370,
+            "id": 377,
             "name": "FunctionDefinition",
-            "src": "5844:82:0"
+            "src": "5844:123:0"
           }
         ],
-        "id": 371,
+        "id": 378,
         "name": "ContractDefinition",
-        "src": "154:5777:0"
+        "src": "154:5818:0"
       }
     ],
-    "id": 372,
+    "id": 379,
     "name": "SourceUnit",
-    "src": "0:5932:0"
+    "src": "0:5973:0"
   },
   "compiler": {
     "name": "solc",
@@ -5212,5 +5309,5 @@
   },
   "networks": {},
   "schemaVersion": "1.0.1",
-  "updatedAt": "2018-01-04T18:42:41.998Z"
+  "updatedAt": "2018-01-04T19:48:26.595Z"
 }
