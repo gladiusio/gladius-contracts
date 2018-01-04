@@ -1256,7 +1256,7 @@
                                       "overloadedDeclarations": [
                                         null
                                       ],
-                                      "referencedDeclaration": 383,
+                                      "referencedDeclaration": 934,
                                       "type": "msg",
                                       "value": "msg"
                                     },
@@ -1552,7 +1552,7 @@
                               "overloadedDeclarations": [
                                 null
                               ],
-                              "referencedDeclaration": 386,
+                              "referencedDeclaration": 937,
                               "type": "function (bool) pure",
                               "value": "require"
                             },
@@ -1649,7 +1649,7 @@
                               "overloadedDeclarations": [
                                 null
                               ],
-                              "referencedDeclaration": 386,
+                              "referencedDeclaration": 937,
                               "type": "function (bool) pure",
                               "value": "require"
                             },
@@ -1772,7 +1772,7 @@
                               "overloadedDeclarations": [
                                 null
                               ],
-                              "referencedDeclaration": 386,
+                              "referencedDeclaration": 937,
                               "type": "function (bool) pure",
                               "value": "require"
                             },
@@ -2358,7 +2358,7 @@
                               "overloadedDeclarations": [
                                 null
                               ],
-                              "referencedDeclaration": 374,
+                              "referencedDeclaration": 925,
                               "type": "function (bool) pure",
                               "value": "assert"
                             },
@@ -2676,7 +2676,7 @@
                                   "overloadedDeclarations": [
                                     null
                                   ],
-                                  "referencedDeclaration": 383,
+                                  "referencedDeclaration": 934,
                                   "type": "msg",
                                   "value": "msg"
                                 },
@@ -2901,7 +2901,7 @@
                               "overloadedDeclarations": [
                                 null
                               ],
-                              "referencedDeclaration": 386,
+                              "referencedDeclaration": 937,
                               "type": "function (bool) pure",
                               "value": "require"
                             },
@@ -3009,7 +3009,7 @@
                                           "overloadedDeclarations": [
                                             null
                                           ],
-                                          "referencedDeclaration": 383,
+                                          "referencedDeclaration": 934,
                                           "type": "msg",
                                           "value": "msg"
                                         },
@@ -3126,7 +3126,7 @@
                                       "overloadedDeclarations": [
                                         null
                                       ],
-                                      "referencedDeclaration": 383,
+                                      "referencedDeclaration": 934,
                                       "type": "msg",
                                       "value": "msg"
                                     },
@@ -3476,7 +3476,7 @@
                                           "overloadedDeclarations": [
                                             null
                                           ],
-                                          "referencedDeclaration": 383,
+                                          "referencedDeclaration": 934,
                                           "type": "msg",
                                           "value": "msg"
                                         },
@@ -3964,7 +3964,7 @@
                                           "overloadedDeclarations": [
                                             null
                                           ],
-                                          "referencedDeclaration": 383,
+                                          "referencedDeclaration": 934,
                                           "type": "msg",
                                           "value": "msg"
                                         },
@@ -3997,7 +3997,7 @@
                                       "overloadedDeclarations": [
                                         null
                                       ],
-                                      "referencedDeclaration": 396,
+                                      "referencedDeclaration": 947,
                                       "type": "contract GladiusToken",
                                       "value": "this"
                                     },
@@ -4188,7 +4188,7 @@
                               "overloadedDeclarations": [
                                 null
                               ],
-                              "referencedDeclaration": 386,
+                              "referencedDeclaration": 937,
                               "type": "function (bool) pure",
                               "value": "require"
                             },
@@ -4253,7 +4253,7 @@
                                           "overloadedDeclarations": [
                                             null
                                           ],
-                                          "referencedDeclaration": 383,
+                                          "referencedDeclaration": 934,
                                           "type": "msg",
                                           "value": "msg"
                                         },
@@ -4355,7 +4355,7 @@
                                       "overloadedDeclarations": [
                                         null
                                       ],
-                                      "referencedDeclaration": 383,
+                                      "referencedDeclaration": 934,
                                       "type": "msg",
                                       "value": "msg"
                                     },
@@ -4506,7 +4506,7 @@
                                   "overloadedDeclarations": [
                                     null
                                   ],
-                                  "referencedDeclaration": 383,
+                                  "referencedDeclaration": 934,
                                   "type": "msg",
                                   "value": "msg"
                                 },
@@ -4718,7 +4718,7 @@
                               "overloadedDeclarations": [
                                 null
                               ],
-                              "referencedDeclaration": 386,
+                              "referencedDeclaration": 937,
                               "type": "function (bool) pure",
                               "value": "require"
                             },
@@ -4841,7 +4841,7 @@
                               "overloadedDeclarations": [
                                 null
                               ],
-                              "referencedDeclaration": 386,
+                              "referencedDeclaration": 937,
                               "type": "function (bool) pure",
                               "value": "require"
                             },
@@ -4949,7 +4949,7 @@
                                           "overloadedDeclarations": [
                                             null
                                           ],
-                                          "referencedDeclaration": 383,
+                                          "referencedDeclaration": 934,
                                           "type": "msg",
                                           "value": "msg"
                                         },
@@ -5146,7 +5146,7 @@
                                       "overloadedDeclarations": [
                                         null
                                       ],
-                                      "referencedDeclaration": 383,
+                                      "referencedDeclaration": 934,
                                       "type": "msg",
                                       "value": "msg"
                                     },
@@ -5495,9 +5495,9 @@
     "5777": {
       "events": {},
       "links": {},
-      "address": "0x3c43493ca8e7bdfa174ee77a05bc44f1986fda41"
+      "address": "0x4ebf5dee668b0d71be8ecbeb98ccc44cdbe8ef85"
     }
   },
   "schemaVersion": "1.0.1",
-  "updatedAt": "2018-01-04T18:29:06.580Z"
+  "updatedAt": "2018-01-04T18:42:58.301Z"
 }
