@@ -25,7 +25,7 @@ contract GladiusToken {
      *
      * Initializes contract with initial supply tokens to the creator of the contract
      */
-    function TokenERC20(
+    function GladiusToken(
         uint256 initialSupply,
         string tokenName,
         string tokenSymbol
