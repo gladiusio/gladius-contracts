@@ -1,7 +1,7 @@
 // Specifically request an abstraction for MetaCoin
-var PoolContract = artifacts.require("Pool");
-var MarketContract = artifacts.require("Market");
-var GladiusToken = artifacts.require("GladiusToken");
+let PoolContract = artifacts.require("Pool");
+let MarketContract = artifacts.require("Market");
+let GladiusToken = artifacts.require("GladiusToken");
 
 
 
@@ -13,51 +13,65 @@ contract('GladiusToken', function(accounts) {
             assert.equal(balance.valueOf(), 10000 * (10**8), "Initial tokens were not allocated to the creator's account");
         });
     });
-});
 
-/*
-contract('MetaCoin', function(accounts) {
-  it("should put 10000 MetaCoin in the first account", function() {
-    return MetaCoin.deployed().then(function(instance) {
-      return instance.getBalance.call(accounts[0]);
-    }).then(function(balance) {
-      assert.equal(balance.valueOf(), 10000, "10000 wasn't in the first account");
+    it("Tokens send correctly", function() {
+        var meta;
+
+        // Get initial balances of first and second account.
+        var account_one = accounts[0];
+        var account_two = accounts[1];
+
+        var account_one_starting_balance;
+        var account_two_starting_balance;
+        var account_one_ending_balance;
+        var account_two_ending_balance;
+
+        var amount = 10;
+
+        return GladiusToken.deployed().then(function(instance) {
+          meta = instance;
+          return meta.balanceOf.call(account_one);
+        }).then(function(balance) {
+          account_one_starting_balance = balance.toNumber();
+          return meta.balanceOf.call(account_two);
+        }).then(function(balance) {
+          account_two_starting_balance = balance.toNumber();
+          return meta.transfer(account_two, amount);
+        }).then(function() {
+          return meta.balanceOf.call(account_one);
+        }).then(function(balance) {
+          account_one_ending_balance = balance.toNumber();
+          return meta.balanceOf.call(account_two);
+        }).then(function(balance) {
+          account_two_ending_balance = balance.toNumber();
+
+          assert.equal(account_one_ending_balance, account_one_starting_balance - amount, "Amount wasn't correctly taken from the sender");
+          assert.equal(account_two_ending_balance, account_two_starting_balance + amount, "Amount wasn't correctly sent to the receiver");
+        });
     });
-  });
-  it("should send coin correctly", function() {
-    var meta;
 
-    // Get initial balances of first and second account.
-    var account_one = accounts[0];
-    var account_two = accounts[1];
+    it("Able to create new tokens", function() {
+        var meta;
 
-    var account_one_starting_balance;
-    var account_two_starting_balance;
-    var account_one_ending_balance;
-    var account_two_ending_balance;
+        // Get initial balances of first and second account.
+        var account_one = accounts[0];
 
-    var amount = 10;
+        var account_one_starting_balance;
+        var account_one_ending_balance;
 
-    return MetaCoin.deployed().then(function(instance) {
-      meta = instance;
-      return meta.getBalance.call(account_one);
-    }).then(function(balance) {
-      account_one_starting_balance = balance.toNumber();
-      return meta.getBalance.call(account_two);
-    }).then(function(balance) {
-      account_two_starting_balance = balance.toNumber();
-      return meta.sendCoin(account_two, amount, {from: account_one});
-    }).then(function() {
-      return meta.getBalance.call(account_one);
-    }).then(function(balance) {
-      account_one_ending_balance = balance.toNumber();
-      return meta.getBalance.call(account_two);
-    }).then(function(balance) {
-      account_two_ending_balance = balance.toNumber();
+        var amount = 10;
 
-      assert.equal(account_one_ending_balance, account_one_starting_balance - amount, "Amount wasn't correctly taken from the sender");
-      assert.equal(account_two_ending_balance, account_two_starting_balance + amount, "Amount wasn't correctly sent to the receiver");
+        return GladiusToken.deployed().then(function(instance) {
+          meta = instance;
+          return meta.balanceOf.call(account_one);
+        }).then(function(balance) {
+          account_one_starting_balance = balance.toNumber();
+          return meta.createToken(amount);
+        }).then(function() {
+          return meta.balanceOf.call(account_one);
+        }).then(function(balance) {
+          account_one_ending_balance = balance.toNumber();
+          assert.equal(account_one_ending_balance, account_one_starting_balance + amount, "Amount was created and given to the caller");
+        });
     });
-  });
 });
-*/

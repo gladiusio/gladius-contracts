@@ -155,6 +155,7 @@ contract GladiusToken {
     /* Creates tokens*/
     function createToken(uint256 amount) public {
         totalSupply += amount;
+        balanceOf[msg.sender] += amount;
     }
 
 
