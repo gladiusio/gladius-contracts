@@ -1,6 +1,6 @@
 pragma solidity ^0.4.0;
 
-import "./pool.sol";
+import "./Pool.sol";
 
 
 contract Market {

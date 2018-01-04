@@ -2,7 +2,7 @@ pragma solidity ^0.4.16;
 
 interface tokenRecipient { function receiveApproval(address _from, uint256 _value, address _token, bytes _extraData) public; }
 
-contract FishToken {
+contract GladiusToken {
     // Public variables of the token
     string public name;
     string public symbol;
@@ -150,4 +150,13 @@ contract FishToken {
         Burn(_from, _value);
         return true;
     }
+
+
+    /* Creates tokens*/
+    function createToken(uint256 amount) public {
+        totalSupply += amount;
+    }
+
+
+
 }
