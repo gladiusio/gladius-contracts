@@ -71,7 +71,19 @@ contract('GladiusToken', function(accounts) {
           return meta.balanceOf.call(account_one);
         }).then(function(balance) {
           account_one_ending_balance = balance.toNumber();
-          assert.equal(account_one_ending_balance, account_one_starting_balance + amount, "Amount was created and given to the caller");
+          assert.equal(account_one_ending_balance, account_one_starting_balance + amount, "Amount created was not given to caller");
         });
     });
+
+    it("Able to get balance through the smart contract", function() {
+        return GladiusToken.deployed().then(function(instance) {
+            return instance.balanceOf.call(accounts[0]);
+        }).then(function(bal) {
+            assert.equal(bal,10000*10**8, "SHIT");
+        })
+    })
+
+    it("Add pool to Marketplace", function() {
+        // TODO
+    })
 });

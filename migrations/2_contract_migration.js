@@ -4,7 +4,8 @@ var Token = artifacts.require("./GladiusToken.sol");
 
 
 module.exports = function(deployer) {
-    deployer.deploy(PoolContract);
-    deployer.deploy(MarketContract);
-    deployer.deploy(Token, 10000, "Gladius Token", "GLA");
+    deployer.deploy(Token, 10000, "Gladius Token", "GLA").then(function() {
+        deployer.deploy(PoolContract);
+        deployer.deploy(MarketContract,Token.address);
+    });
 };
