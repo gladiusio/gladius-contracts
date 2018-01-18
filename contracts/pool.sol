@@ -25,11 +25,10 @@ contract Pool {
     }
 
     PoolData data;
-
     Client client; // Later versions will support multiple clients
     string clientData = ""; // Encrypted data for the client
-    mapping (address => Node) proposals;
 
+    mapping (address => Node) proposals;
     mapping (address => Client) clientRequests;
 
     address[] private proposedAddresses;
