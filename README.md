@@ -6,14 +6,14 @@ Main marketplace contract:
 - Adds pools to the marketplace list
 - Holds payments (security deposit) from pool owners?
 
-# Pool.sol
+## Pool.sol
 Main pool contract:
 - Pays nodes in the pool
 - Sets rules of the pool
 - Keeps track of data from the nodes
 - Sends data to nodes
 
-# GladiusToken.sol
+## GladiusToken.sol
 Fake ERC-20 Token
 
 ## How to deploy to a local blockchain
