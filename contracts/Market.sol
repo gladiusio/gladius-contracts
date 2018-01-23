@@ -2,7 +2,7 @@ pragma solidity ^0.4.18;
 
 import "./Pool.sol";
 
-contract owned {
+contract Owned {
     function owned() public { owner = msg.sender; }
     address owner;
 
@@ -19,6 +19,7 @@ contract owned {
     }
 }
 
+/// Maps functions of Gladius Token to the base Token contract
 contract Token {
     mapping (address => uint256) public balanceOf;
     function getBal(address owner) public returns(uint256 bal);
@@ -27,15 +28,15 @@ contract Token {
 
 contract Market {
 
-    mapping(address => Pool[]) public marketPools; // all pools in market
-    mapping(address => Pool[]) public ownedPools; // all pools created
-    mapping(address => Pool) public clientToPool; // pool that website uses
-    mapping(address => address) public poolToOwner;
-    mapping(address => uint32) tokensPaid; // account balance of the clients
+    mapping(address => Pool[]) public marketPools;        // All Pools in marketplace, ignores non-market Pools
+    mapping(address => Pool[]) public ownedPools;         // All Pools created off this contract, regardless of listing in marketplace
+    mapping(address => Pool) public clientToPool;         // Client that pays the Pool for service
+    mapping(address => address) public poolToOwner;       // Owner of a Pool
+    mapping(address => uint32) tokensPaid;                // Account balance of the clients
 
-    address owner;
-    uint256 maxPayout; //max amount a pool can withdraw daily
-    uint256 joinCost; //cost to join marketplace
+    address owner;                                        // Owner of the market
+    uint256 maxPayout;                                    // Max amount a pool can withdraw daily
+    uint256 joinCost;                                     // Cost to join marketplace
 
     Token gladiusToken;
 
@@ -70,7 +71,6 @@ contract Market {
     /**
      * Returns an array of all pools that a website(client) uses
      *
-     * Logic
      * @param client Address of client to query pools
      * @return poolAddress Address to a list of pools the client is a part of
      */
@@ -98,9 +98,14 @@ contract Market {
         return true;
     }
 
-    /* Pay pool certain amount. Manual as of now, automated in the future */
-    /* Only the owner of a pool can withdraw money from its pool */
-    /* Gladius must be able to withdraw money from listing a pool on the marketplace */
+    /**
+     * WIP
+     * Owner can withdraw money from their pool
+     * Only the owner of a pool can withdraw money from its pool
+     * Gladius must be able to withdraw money from listing a pool on the marketplace
+     * 
+     * @param amount Amount the owver wants to withdraw
+     */
     function withdraw(uint256 amount) public returns(bool){
         if( msg.sender == owner)
             return true;
