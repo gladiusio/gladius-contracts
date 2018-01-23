@@ -2,6 +2,23 @@ pragma solidity ^0.4.18;
 
 import "./Pool.sol";
 
+contract owned {
+    function owned() public { owner = msg.sender; }
+    address owner;
+
+    // This contract only defines a modifier but does not use
+    // it: it will be used in derived contracts.
+    // The function body is inserted where the special symbol
+    // `_;` in the definition of a modifier appears.
+    // This means that if the owner calls this function, the
+    // function is executed and otherwise, an exception is
+    // thrown.
+    modifier onlyOwner {
+        require(msg.sender == owner);
+        _;
+    }
+}
+
 contract Token {
     mapping (address => uint256) public balanceOf;
     function getBal(address owner) public returns(uint256 bal);
@@ -10,20 +27,22 @@ contract Token {
 
 contract Market {
 
-    mapping(address => Pool[]) marketPools; // all pools in market
-    mapping(address => Pool[]) ownedPools; // all pools created
-    mapping(address => Pool) clientPool; // pool that website uses
-    mapping(address => address) poolToOwner;
-    mapping(address => uint32) tokensPaid; // The number of tokens a person has paid to the market.
+    mapping(address => Pool[]) public marketPools; // all pools in market
+    mapping(address => Pool[]) public ownedPools; // all pools created
+    mapping(address => Pool) public clientToPool; // pool that website uses
+    mapping(address => address) public poolToOwner;
+    mapping(address => uint32) tokensPaid; // account balance of the clients
+
+    uint256 maxPayout; //max amount a pool can withdraw daily
+    uint256 joinCost; //cost to join marketplace
 
     Token gladiusToken;
 
-    uint256 joinCost; //cost to create a pool
-
-    /* Marketplace contrusctor, add the gladiusToken address and the initial cost per pool */
-    function Market(address gladiusTokenAddress, uint256 cost) public {
-        gladiusToken = Token(gladiusTokenAddress);
+    /* Marketplace contrusctor, add the token address and the initial cost per pool */
+    function Market(address tokenAddress, uint256 cost, uint256 maxPay) public {
+        gladiusToken = Token(tokenAddress);
         joinCost = cost;
+        maxPayout = maxPay;
     }
 
     /* Create a new pool. This is FREE but DOES NOT add pool to the marketplace */
@@ -47,7 +66,7 @@ contract Market {
     function joinMarketplace(address poolAddress) public returns(bool) {
         require(poolToOwner[poolAddress] == msg.sender); //caller owns pool and pool exists
 
-        token.transferFrom(msg.sender, address(this), joinCost); //charge the caller to add to marketplace (right now just burn)
+        gladiusToken.transferFrom(msg.sender, address(this), joinCost); //charge the caller to add to marketplace (right now just burn)
 
         Pool p = Pool(poolAddress);
         marketPools[msg.sender].push(p); //add pool to the marketplace
@@ -56,9 +75,10 @@ contract Market {
     }
 
     /* Pay pool certain amount. Manual as of now, automated in the future */
-    function payPool(address poolAddress, uint amount) public returns(bool){
-        token.transferFrom(address(this), poolAddress, amount);
-
-        return true;
+    function withdraw(uint256 amount) public returns(bool){
+        if( msg.sender == owner)
+            return true;
+        else
+            return false;
     }
 }
