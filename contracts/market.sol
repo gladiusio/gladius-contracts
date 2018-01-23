@@ -33,36 +33,60 @@ contract Market {
     mapping(address => address) public poolToOwner;
     mapping(address => uint32) tokensPaid; // account balance of the clients
 
+    address owner;
     uint256 maxPayout; //max amount a pool can withdraw daily
     uint256 joinCost; //cost to join marketplace
 
     Token gladiusToken;
 
-    /* Marketplace contrusctor, add the token address and the initial cost per pool */
-    function Market(address tokenAddress, uint256 cost, uint256 maxPay) public {
-        gladiusToken = Token(tokenAddress);
-        joinCost = cost;
-        maxPayout = maxPay;
+    /**
+     * Marketplace constructor
+     *
+     * Logic
+     * @param _gladiusToken GladiusToken address
+     * @param _joinCost Cost to join the marketplace
+     * @param _maxPayout Maxium payout to pool owners in a given day
+     */
+    function Market(address _gladiusToken, uint256 _joinCost, uint256 _maxPayout) public {
+        gladiusToken = Token(_gladiusToken);
+        joinCost = _joinCost;
+        maxPayout = _maxPayout;
     }
 
-    /* Create a new pool. This is FREE but DOES NOT add pool to the marketplace */
+    /**
+     * Create a new pool. This is FREE but DOES NOT add pool to the marketplace
+     *
+     * Instantiate a new Pool and set the sender as the owner
+     * @param publicKey Public RSA key used to encrypt traffic
+     * @return address Address to the new Pool
+     */
     function createPool(string publicKey) public returns(address) {
-        Pool p = new Pool(publicKey, msg.sender);
-        ownedPools[msg.sender].push(p);
+        Pool newPool = new Pool(publicKey, msg.sender);
+        ownedPools[msg.sender].push(newPool);
 
-        return p;
+        return newPool;
     }
 
-    /* Returns an array of all of the pools that belong to owner */
-    function getOwnedPools(address owner) public view returns(Pool[]) {
-        return ownedPools[owner];
-    }
-    /* Returns an array of all pools that a website(client) uses */
+    /**
+     * Returns an array of all pools that a website(client) uses
+     *
+     * Logic
+     * @param client Address of client to query pools
+     * @return poolAddress Address to a list of pools the client is a part of
+     */
     function getClientPool(address client) public view returns(Pool) {
-        return clientPool[client];
+        return clientToPool[client];
     }
 
-    /* Add pool to the marketplace and charge the owner */
+    /**
+     * Adds the pool address to the marketplace, and charges the owner of the pool the join cost
+     *
+     * Require that the pool's owner is the sender
+     * Checks account balance and transfers money from the sender to the pool's address for the join cost
+     * Creates a pool instance from the address and pushes the pool to the market place pools
+     * 
+     * @param poolAddress Param Description
+     */
     function joinMarketplace(address poolAddress) public returns(bool) {
         require(poolToOwner[poolAddress] == msg.sender); //caller owns pool and pool exists
 
@@ -75,6 +99,8 @@ contract Market {
     }
 
     /* Pay pool certain amount. Manual as of now, automated in the future */
+    /* Only the owner of a pool can withdraw money from its pool */
+    /* Gladius must be able to withdraw money from listing a pool on the marketplace */
     function withdraw(uint256 amount) public returns(bool){
         if( msg.sender == owner)
             return true;
