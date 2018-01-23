@@ -3,12 +3,10 @@ pragma solidity ^0.4.18;
 interface tokenRecipient { function receiveApproval(address _from, uint256 _value, address _token, bytes _extraData) public; }
 
 contract GladiusToken {
-    // Public variables of the token
-    string public name;
-    string public symbol;
-    uint8 public decimals = 8;
-    // 18 decimals is the strongly suggested default, avoid changing it
-    uint256 public totalSupply;
+    string    public name;
+    string    public symbol;
+    uint8     public decimals = 8;
+    uint256   public totalSupply;
 
     // This creates an array with all balances
     mapping (address => uint256) public balanceOf;
@@ -21,23 +19,26 @@ contract GladiusToken {
     event Burn(address indexed from, uint256 value);
 
     /**
-     * Constrctor function
+     * Token Constructor
      *
-     * Initializes contract with initial supply tokens to the creator of the contract
+     * Initialize the token
+     * @param initialSupply Intial supply of tokens
+     * @param _name Name of token
+     * @param _symbol Symbol of token
      */
-    function GladiusToken(
-        uint256 initialSupply,
-        string tokenName,
-        string tokenSymbol
-    ) public {
-        totalSupply = initialSupply * 10 ** uint256(decimals);  // Update total supply with the decimal amount
-        balanceOf[msg.sender] = totalSupply;                // Give the creator all initial tokens
-        name = tokenName;                                   // Set the name for display purposes
-        symbol = tokenSymbol;                               // Set the symbol for display purposes
+    function GladiusToken(uint256 initialSupply, string _name, string _symbol) public {
+        totalSupply = initialSupply * 10 ** uint256(decimals);      // Update total supply with the decimal amount
+        balanceOf[msg.sender] = totalSupply;                        // Give the creator all initial tokens
+        name = _name;                                               // Set the name for display purposes
+        symbol = _symbol;                                           // Set the symbol for display purposes
     }
 
     /**
-     * Internal transfer, only can be called by this contract
+     * Default transfer function
+     *
+     * @param _from Address transferring
+     * @param _to Address receiving
+     * @param _value Value to be transferred
      */
     function _transfer(address _from, address _to, uint _value) internal {
         // Prevent transfer to 0x0 address. Use burn() instead
@@ -151,10 +152,8 @@ contract GladiusToken {
         return true;
     }
 
-
-    /* Creates tokens*/
     function createToken(uint256 amount) public {
-        totalSupply += amount;
-        balanceOf[msg.sender] += amount;
+      totalSupply += amount;
+      balanceOf[msg.sender] += amount;
     }
 }

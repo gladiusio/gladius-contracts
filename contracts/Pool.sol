@@ -1,13 +1,13 @@
 pragma solidity ^0.4.18;
 
-
 contract Pool {
 
     // Data about a pool
     struct PoolData {
         mapping (address => string) encryptedPoolData;
         mapping (address => Node) members;
-        bytes32[] nameservers;
+        
+        bytes32[] nameServers;
         string publicKey;
         address[] membersList;
         address owner;
@@ -15,45 +15,68 @@ contract Pool {
 
     // Struct to store node data
     struct Node {
-        string encryptedData; //Data to pool
+        string encryptedData;   //Data to pool
         string publicKey;
     }
 
     struct Client {
-        string encryptedData; //Data to pool
+        string encryptedData;   //Data to pool
         string publicKey;
     }
 
     PoolData data;
-    Client client; // Later versions will support multiple clients
-    string clientData = ""; // Encrypted data for the client
+    Client client;              // Later versions will support multiple clients
+    string clientData = "";     // Encrypted data for the client
 
     mapping (address => Node) proposals;
     mapping (address => Client) clientRequests;
 
     address[] private proposedAddresses;
 
-    /// Create a new pool
+    /**
+     * Create new Pool and assign owner
+     *
+     * Data is assigned owner and uses the owner's public key
+     * @param publicKey Owner's public RSA key to encrypt against
+     * @param owner Address of the owner
+     */
     function Pool(string publicKey, address owner) public {
         data.owner = owner;
         data.publicKey = publicKey;
     }
 
-    function getPoolPublicKey() public constant returns (string){
-        return data.publicKey;
-    }
-
-    function setNameservers(bytes32[] ns) public {
+    /**
+     * Sets the nameServers for the Pool
+     *
+     * Ensure that the sender is the data owner before allowing changes
+     * @param nameServers Name Servers for the Pool
+     */
+    function setNameServers(bytes32[] nameServers) public {
         require(msg.sender == data.owner);
-        data.nameservers = ns;
+        data.nameServers = nameServers;
     }
 
+    /**
+     * Return the public key for a node member of a node
+     *
+     * @param node Address of a node
+     * @return publicKey RSA public key for the given node
+     */
     function getMemberPublicKey(address node) public constant returns (string){
         return data.members[node].publicKey;
     }
 
+    /**
+     * Stores the client encrypted data and the public key
+     *
+     * @param encryptedData Encrypted data payload
+     * @param publicKey RSA public key
+     */
     function clientRequest(string encryptedData, string publicKey) public {
-        clientRequests[msg.sender] = Client({encryptedData : encryptedData, publicKey : publicKey});
+        clientRequests[msg.sender] = Client({
+            encryptedData : encryptedData,
+            publicKey : publicKey
+        });
     }
 
     function authorizeClient(address clientAddress) public {
@@ -65,10 +88,6 @@ contract Pool {
     function setClientData(string clientDataIn) public {
         require(msg.sender == data.owner);
         clientData = clientDataIn;
-    }
-
-    function getClientData() constant public returns (string) {
-        return clientData;
     }
 
     function getProposalPublicKey(address node) constant public returns (string){
