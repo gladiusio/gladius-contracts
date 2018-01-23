@@ -14,15 +14,15 @@ contract Market {
     mapping(address => Pool[]) ownedPools; // all pools created
     mapping(address => Pool) clientPool; // pool that website uses
     mapping(address => address) poolToOwner;
-    mapping(address => uint32) tokensPayed; // The number of tokens a person has payed to the market.
+    mapping(address => uint32) tokensPaid; // The number of tokens a person has paid to the market.
 
-    Token token;
+    Token gladiusToken;
 
     uint256 joinCost; //cost to create a pool
 
-    /* Marketplace contrusctor, add the token address and the initial cost per pool */
-    function Market(address tokenAddress, uint256 cost) public {
-        token = Token(tokenAddress);
+    /* Marketplace contrusctor, add the gladiusToken address and the initial cost per pool */
+    function Market(address gladiusTokenAddress, uint256 cost) public {
+        gladiusToken = Token(gladiusTokenAddress);
         joinCost = cost;
     }
 
@@ -61,8 +61,4 @@ contract Market {
 
         return true;
     }
-
-
-
-
 }

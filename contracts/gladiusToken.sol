@@ -157,5 +157,4 @@ contract GladiusToken {
         totalSupply += amount;
         balanceOf[msg.sender] += amount;
     }
-
 }
