@@ -1,7 +1,7 @@
 // Specifically request an abstraction for MetaCoin
-let PoolContract = artifacts.require('Pool');
-let MarketContract = artifacts.require('Market');
-let GladiusToken = artifacts.require('GladiusToken');
+let PoolContract = artifacts.require('Pool')
+let MarketContract = artifacts.require('Market')
+let GladiusToken = artifacts.require('GladiusToken')
 
 contract('GladiusToken', function(accounts) {
   // Accounts
@@ -57,6 +57,27 @@ contract('GladiusToken', function(accounts) {
       totalEndingSupply.toNumber(),
       totalInitialSupply.toNumber() - burnAmount,
       'Tokens did not successfully burn'
+    )
+  })
+
+  it('Approval of spending from other accounts', async function() {
+    let approvalAmount = 25.0
+    
+    let gladius = await GladiusToken.deployed()
+    
+    let userStartBalance = await gladius.balanceOf.call(user)
+    
+    await gladius.approve(user, approvalAmount, { from: creator })
+    
+    await gladius.transferFrom(creator, user, approvalAmount, { from: user })
+    
+    let creatorBalance = await gladius.balanceOf.call(creator)
+    let userBalance = await gladius.balanceOf.call(user)
+
+    assert.equal(
+      userBalance.toNumber(),
+      userStartBalance.toNumber() + approvalAmount,
+      'Tokens were not approved for transfer'
     )
   })
 })
