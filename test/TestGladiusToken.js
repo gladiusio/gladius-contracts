@@ -1,6 +1,6 @@
 // Specifically request an abstraction for MetaCoin
-let PoolContract = artifacts.require('Pool')
-let MarketContract = artifacts.require('Market')
+let Pool = artifacts.require('Pool')
+let Market = artifacts.require('Market')
 let GladiusToken = artifacts.require('GladiusToken')
 
 contract('GladiusToken', function(accounts) {
@@ -10,74 +10,76 @@ contract('GladiusToken', function(accounts) {
 
   let initialSupply = 10000 * (10**8)
 
-  // Test creation of tokens
-  it('Deploy Tokens to Creator\'s Account', async function() {
-    let gladius = await GladiusToken.deployed()
-    let balance = await gladius.balanceOf.call(accounts[0])
-    assert.equal(balance.valueOf(), initialSupply, 'Initial tokens were not allocated to the creator\'s account')
-  })
+  describe('Gladius Token Contract', function() {
+    // Test creation of tokens
+    it('Deploy Tokens to Creator\'s Account', async function() {
+      let gladius = await GladiusToken.deployed()
+      let balance = await gladius.balanceOf.call(accounts[0])
+      assert.equal(balance.valueOf(), initialSupply, 'Initial tokens were not allocated to the creator\'s account')
+    })
 
-  // Test balance transfers
-  it('Simulate transfer from creator to user', async function() {
-    let transferAmount = 10
-    
-    // Grab instance
-    let gladius = await GladiusToken.deployed()
-    let creatorStartBalance = await gladius.balanceOf.call(creator)
-    let userStartBalance = await gladius.balanceOf.call(user)
+    // Test balance transfers
+    it('Simulate transfer from creator to user', async function() {
+      let transferAmount = 10
 
-    await gladius.transfer(user, transferAmount)
+      // Grab instance
+      let gladius = await GladiusToken.deployed()
+      let creatorStartBalance = await gladius.balanceOf.call(creator)
+      let userStartBalance = await gladius.balanceOf.call(user)
 
-    let creatorEndBalance = await gladius.balanceOf.call(creator)
-    let userEndBalance = await gladius.balanceOf.call(user)
+      await gladius.transfer(user, transferAmount)
 
-    assert.equal(
-      creatorEndBalance.toNumber(),
-      creatorStartBalance.toNumber() - transferAmount,
-      'Amount wasn\'t correctly taken from the sender'
-    )
-    assert.equal(
-      userEndBalance.toNumber(),
-      userStartBalance.toNumber() + transferAmount,
-      'Amount wasn\'t correctly sent to the receiver'
-    )
-  })
+      let creatorEndBalance = await gladius.balanceOf.call(creator)
+      let userEndBalance = await gladius.balanceOf.call(user)
 
-  it('Simulate burning tokens', async function() {
-    let burnAmount = 50.0
-    
-    let gladius = await GladiusToken.deployed()
-    let totalInitialSupply = await gladius.totalSupply.call()
+      assert.equal(
+        creatorEndBalance.toNumber(),
+        creatorStartBalance.toNumber() - transferAmount,
+        'Amount wasn\'t correctly taken from the sender'
+      )
+      assert.equal(
+        userEndBalance.toNumber(),
+        userStartBalance.toNumber() + transferAmount,
+        'Amount wasn\'t correctly sent to the receiver'
+      )
+    })
 
-    await gladius.burn(burnAmount)
+    it('Simulate burning tokens', async function() {
+      let burnAmount = 50.0
 
-    let totalEndingSupply = await gladius.totalSupply.call()
+      let gladius = await GladiusToken.deployed()
+      let totalInitialSupply = await gladius.totalSupply.call()
 
-    assert.equal(
-      totalEndingSupply.toNumber(),
-      totalInitialSupply.toNumber() - burnAmount,
-      'Tokens did not successfully burn'
-    )
-  })
+      await gladius.burn(burnAmount)
 
-  it('Approval of spending from other accounts', async function() {
-    let approvalAmount = 25.0
-    
-    let gladius = await GladiusToken.deployed()
-    
-    let userStartBalance = await gladius.balanceOf.call(user)
-    
-    await gladius.approve(user, approvalAmount, { from: creator })
-    
-    await gladius.transferFrom(creator, user, approvalAmount, { from: user })
-    
-    let creatorBalance = await gladius.balanceOf.call(creator)
-    let userBalance = await gladius.balanceOf.call(user)
+      let totalEndingSupply = await gladius.totalSupply.call()
 
-    assert.equal(
-      userBalance.toNumber(),
-      userStartBalance.toNumber() + approvalAmount,
-      'Tokens were not approved for transfer'
-    )
+      assert.equal(
+        totalEndingSupply.toNumber(),
+        totalInitialSupply.toNumber() - burnAmount,
+        'Tokens did not successfully burn'
+      )
+    })
+
+    it('Approval of spending from other accounts', async function() {
+      let approvalAmount = 25.0
+
+      let gladius = await GladiusToken.deployed()
+
+      let userStartBalance = await gladius.balanceOf.call(user)
+
+      await gladius.approve(user, approvalAmount, { from: creator })
+
+      await gladius.transferFrom(creator, user, approvalAmount, { from: user })
+
+      let creatorBalance = await gladius.balanceOf.call(creator)
+      let userBalance = await gladius.balanceOf.call(user)
+
+      assert.equal(
+        userBalance.toNumber(),
+        userStartBalance.toNumber() + approvalAmount,
+        'Tokens were not approved for transfer'
+      )
+    })
   })
 })
