@@ -106,10 +106,10 @@ contract Market {
      * 
      * @param amount Amount the owver wants to withdraw
      */
-    function withdraw(uint256 amount) public returns(bool){
-        if( msg.sender == owner)
-            return true;
-        else
-            return false;
-    }
+    // function withdraw(uint256 amount) public returns(bool){
+    //     if( msg.sender == owner)
+    //         return true;
+    //     else
+    //         return false;
+    // }
 }
