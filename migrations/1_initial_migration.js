@@ -1,4 +1,4 @@
-let Migrations = artifacts.require('./Migrations.sol')
+let Migrations = artifacts.require('Migrations')
 
 module.exports = function(deployer) {
   deployer.deploy(Migrations)
