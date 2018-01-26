@@ -10,9 +10,9 @@ contract('GladiusToken', function(accounts) {
 
   let initialSupply = 10000 * (10**8)
 
-  describe('Gladius Token Contract', function() {
+  describe('Test Gladius Token Contract', function() {
     // Test creation of token
-    it('Test token constructor', async function() {
+    it('Token constructor', async function() {
       let gladius = await GladiusToken.deployed()
       let gladiusSymbol = await gladius.symbol.call()
       assert.equal(gladiusSymbol, 'GLA', 'Token constructor did not initialize correctly')

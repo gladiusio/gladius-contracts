@@ -8,7 +8,7 @@ contract('Market', function(accounts) {
   let user = accounts[1]
 
   // Test creation of marketplace
-  describe('Market Contract', function() {
+  describe('Test Market Contract', function() {
     it('Check Owner', async function() {
       let market = await Market.deployed()
       let marketOwner = await market.owner.call()
