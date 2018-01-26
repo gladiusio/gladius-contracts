@@ -1,11 +1,9 @@
-var PoolContract = artifacts.require("./Pool.sol");
-var MarketContract = artifacts.require("./Market.sol");
-var Token = artifacts.require("./GladiusToken.sol");
+let PoolContract = artifacts.require('Pool')
+let MarketContract = artifacts.require('Market')
+let GladiusToken = artifacts.require('GladiusToken')
 
-
-module.exports = function(deployer) {
-    deployer.deploy(Token, 10000, "Gladius Token", "GLA").then(function() {
-        deployer.deploy(PoolContract);
-        deployer.deploy(MarketContract,Token.address);
-    });
-};
+module.exports = function(deployer, network, accounts) {
+  deployer.deploy(GladiusToken, 10000, 'Gladius Token', 'GLA').then( ()=> {
+    return deployer.deploy(MarketContract, accounts[0], GladiusToken.address, 10, 10)
+  })
+}

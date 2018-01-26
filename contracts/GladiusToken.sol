@@ -151,9 +151,4 @@ contract GladiusToken {
         Burn(_from, _value);
         return true;
     }
-
-    function createToken(uint256 amount) public {
-      totalSupply += amount;
-      balanceOf[msg.sender] += amount;
-    }
 }

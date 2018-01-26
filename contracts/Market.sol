@@ -34,7 +34,7 @@ contract Market {
     mapping(address => address) public poolToOwner;       // Owner of a Pool
     mapping(address => uint32) tokensPaid;                // Account balance of the clients
 
-    address owner;                                        // Owner of the market
+    address public owner;                                        // Owner of the market
     uint256 maxPayout;                                    // Max amount a pool can withdraw daily
     uint256 joinCost;                                     // Cost to join marketplace
 
@@ -44,11 +44,13 @@ contract Market {
      * Marketplace constructor
      *
      * Logic
+     * @param _owner Owner's address
      * @param _gladiusToken GladiusToken address
      * @param _joinCost Cost to join the marketplace
      * @param _maxPayout Maxium payout to pool owners in a given day
      */
-    function Market(address _gladiusToken, uint256 _joinCost, uint256 _maxPayout) public {
+    function Market(address _owner, address _gladiusToken, uint256 _joinCost, uint256 _maxPayout) public {
+        owner = _owner;
         gladiusToken = Token(_gladiusToken);
         joinCost = _joinCost;
         maxPayout = _maxPayout;
@@ -66,6 +68,10 @@ contract Market {
         ownedPools[msg.sender].push(newPool);
 
         return newPool;
+    }
+
+    function getOwnedPools(address ownerAddress) public returns (Pool[]) {
+      return ownedPools[ownerAddress];
     }
 
     /**
@@ -106,10 +112,10 @@ contract Market {
      * 
      * @param amount Amount the owver wants to withdraw
      */
-    function withdraw(uint256 amount) public returns(bool){
-        if( msg.sender == owner)
-            return true;
-        else
-            return false;
-    }
+    // function withdraw(uint256 amount) public returns(bool){
+    //     if( msg.sender == owner)
+    //         return true;
+    //     else
+    //         return false;
+    // }
 }
