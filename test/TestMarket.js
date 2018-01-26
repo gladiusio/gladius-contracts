@@ -10,9 +10,7 @@ contract('Market', function(accounts) {
   // Test creation of marketplace
   describe('Market Contract', function() {
     it('Deploy Tokens to Creator\'s Account', async function() {
-      //let gladius = await GladiusToken.deployed()
       let market = await Market.deployed()
-      console.log(market)
     })
   })
 })
