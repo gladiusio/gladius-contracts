@@ -70,6 +70,10 @@ contract Market {
         return newPool;
     }
 
+    function getOwnedPools(address ownerAddress) public returns (Pool[]) {
+      return ownedPools[ownerAddress];
+    }
+
     /**
      * Returns an array of all pools that a website(client) uses
      *
