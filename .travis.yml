@@ -6,6 +6,8 @@ node_js:
 before_install:
   - npm install -g npm@latest
   - npm install -g truffle
+  - npm install -g ganache-cli
 
 script:
+  - ganache-cli
   - truffle test --network travisci
