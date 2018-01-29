@@ -5,6 +5,11 @@ module.exports = {
             port: 7545,
             network_id: "*" // Match any network id
         },
+        travisci: {
+            host: "localhost",
+            port: 8545,
+            network_id: "*" // Match any network id
+        },
         rinkeby: {
             host: "localhost", // Connect to geth on the specified
             port: 8545,
