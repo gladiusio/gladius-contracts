@@ -1,6 +1,10 @@
 # Gladius Marketplace Backend
 
-# Market.sol
+## Status
+
+[![Build Status](https://travis-ci.com/gladiusio/gladius-marketplace-backend.svg?token=DZTxBr3af1FsUxy8yWoy&branch=dev)](https://travis-ci.com/gladiusio/gladius-marketplace-backend)
+
+## Market.sol
 Main marketplace contract:
 - Acts as a factory to create new pools
 - Adds pools to the marketplace list
