@@ -1,7 +1,5 @@
 # Gladius Marketplace Backend
 
-## Status
-
 [![Build Status](https://travis-ci.com/gladiusio/gladius-marketplace-backend.svg?token=DZTxBr3af1FsUxy8yWoy&branch=dev)](https://travis-ci.com/gladiusio/gladius-marketplace-backend)
 
 ## Market.sol
