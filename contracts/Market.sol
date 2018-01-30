@@ -120,7 +120,7 @@ contract Market {
         return true;
     }
 
-    function allocateClientFundsTo(address poolAddress, uint32 allocationAmount) public {
+    function allocateClientFundsTo(address poolAddress, address userAddress, uint32 allocationAmount) public returns (bool) {
         uint256 _balanceTotal = allocationAmount;
         uint256 _balanceAvailable = (3 * allocationAmount) / 5;
         uint256 _balanceWorkable = allocationAmount - _balanceAvailable;
@@ -136,8 +136,8 @@ contract Market {
         balanceCompleted += _balanceCompleted;
         balancePayable += _balancePayable;
 
-        //Pool pool = Pool(poolAddress);
+        Pool pool = Pool(poolAddress);
         // Allocate pool balance
-        // WIP
+        return pool.allocateClientFundsFrom(userAddress, allocationAmount);
     }
 }
