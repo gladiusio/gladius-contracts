@@ -34,10 +34,26 @@ contract Market {
     mapping(address => address) public poolToOwner;       // Owner of a Pool
     mapping(address => uint32) tokensPaid;                // Account balance of the clients
 
-    address public owner;                                        // Owner of the market
+    address public owner;                                 // Owner of the market
     uint256 maxPayout;                                    // Max amount a pool can withdraw daily
     uint256 joinCost;                                     // Cost to join marketplace
 
+    // Ratios
+
+    // Work Ratio           - Amount set aside to work balance
+
+    // ----------------------
+
+    // Balances
+    
+    uint256 public balanceTotal;                                 // Total balance        - Complete Balance
+    uint256 public balanceAvailable;                             // Available Balance    - Allocatable Balance
+    uint256 public balanceTransactionCosts;                      // Market Fee Balance   - Balance to hold transaction fees
+    uint256 public balanceWorkable;                              // Work Balance         - Allocated Balance
+    uint256 public balanceCompleted;                             // Work Completed       - Work completed balance
+    uint256 public balancePayable;                               // Payout Balance       - Balance able to withdraw
+
+    uint256 public balanceWithdrawable;                          // Payout Balance       - Balance able to withdraw
     Token gladiusToken;
 
     /**
@@ -104,18 +120,24 @@ contract Market {
         return true;
     }
 
-    /**
-     * WIP
-     * Owner can withdraw money from their pool
-     * Only the owner of a pool can withdraw money from its pool
-     * Gladius must be able to withdraw money from listing a pool on the marketplace
-     * 
-     * @param amount Amount the owver wants to withdraw
-     */
-    // function withdraw(uint256 amount) public returns(bool){
-    //     if( msg.sender == owner)
-    //         return true;
-    //     else
-    //         return false;
-    // }
+    function allocateClientFundsTo(address poolAddress, uint32 allocationAmount) public {
+        uint256 _balanceTotal = allocationAmount;
+        uint256 _balanceAvailable = (3 * allocationAmount) / 5;
+        uint256 _balanceWorkable = allocationAmount - _balanceAvailable;
+        uint256 _balanceWithdrawable = 0;
+        uint256 _balanceCompleted = 0;
+        uint256 _balancePayable = 0;
+
+        // Allocate market funds
+        balanceTotal += _balanceTotal;
+        balanceAvailable += _balanceAvailable;
+        balanceWorkable += _balanceWorkable;
+        balanceWithdrawable += _balanceWithdrawable;
+        balanceCompleted += _balanceCompleted;
+        balancePayable += _balancePayable;
+
+        //Pool pool = Pool(poolAddress);
+        // Allocate pool balance
+        // WIP
+    }
 }

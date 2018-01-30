@@ -30,5 +30,25 @@ contract('Market', function(accounts) {
       // Assert that 2 of the 3 pools created are owned by the user
       assert.equal(initialMarketPools.length + 2, endingMarketPools.length, 'Pools added to the marketplace do not equal the market pools')
     })
+
+    it('Pool token allocation', async function () {
+      let market = await Market.deployed()
+
+      let amount = 10
+
+      //console.log(market)
+
+      await market.allocateClientFundsTo(owner, amount)
+
+      let balanceTotal = await market.balanceTotal.call()
+      console.log(balanceTotal.toNumber())
+
+      let balanceAvailable = await market.balanceAvailable.call()
+      console.log(balanceAvailable.toNumber())
+
+      let balanceWorkable = await market.balanceWorkable.call()
+      console.log(balanceWorkable.toNumber())
+
+    })
   })
 })
