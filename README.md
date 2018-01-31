@@ -2,24 +2,66 @@
 
 [![Build Status](https://travis-ci.com/gladiusio/gladius-marketplace-backend.svg?token=DZTxBr3af1FsUxy8yWoy&branch=dev)](https://travis-ci.com/gladiusio/gladius-marketplace-backend)
 
-## Market.sol
-Main marketplace contract:
-- Acts as a factory to create new pools
-- Adds pools to the marketplace list
-- Holds payments (security deposit) from pool owners?
+## Installation & Testing
 
-## Pool.sol
-Main pool contract:
-- Pays nodes in the pool
-- Sets rules of the pool
-- Keeps track of data from the nodes
-- Sends data to nodes
+* Run local blockchain (we like Ganache)
+* Make sure to have the right port in `truffle.js`
+* Compile: `truffle compile`
+* Migrate (deploy): `truffle migrate --reset`
+* Test: `truffle test`
 
-## GladiusToken.sol
+## Contribution Guide
+
+### Platform Requirements
+
+* Node.js, `>=7.6.0`
+* Truffle
+* Ganache, (Optional)
+* Default port in `truffle.js` is `7545` for development network
+
+### General
+
+* Issue Requests
+    * Please search for existing issues before creating
+    * Search Solidity, Truffle, and Ganache issues as well
+    * Provide system info
+        * System, Ubuntu, macOS, Windows 10, etc.
+        * Node version, `node -v`
+    * Console output
+    * Behavior
+        * Expected
+        * Actual
+    * Steps to reproduce
+* Pull Requests
+    * Pull Requests should be tied to a specific and single issue
+    * PR's will have to pass the automated test suite before manual review
+    * Keep comments and opinions constructive for all parties
+* Code Style
+    * We will be updating our code to fully conform to the [Solidity Code Style Guide](http://solidity.readthedocs.io/en/develop/style-guide.html)
+    * Any Pull Requests should also conform to this guide
+    * Add doc blocks where necessary to comment functionality
+    ```
+    /**
+     * Title
+     *
+     * Description (Optional)
+     * @param paramName Description of parameter
+     * @return
+     */
+    ```
+
+## Code Overview
+
+More in-depth descriptions coming soon
+
+### Market.sol
+
+Main marketplace contract
+
+### Pool.sol
+
+Main pool contract
+
+### GladiusToken.sol
+
 Fake ERC-20 Token
-
-## How to deploy to a local blockchain
-- Run local blockchain (we like Ganache)
-- Make sure to have the right port in `truffle.js`
-- Compile: `truffle compile`
-- Migrate(deploy): `truffle migrate --reset`
