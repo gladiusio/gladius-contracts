@@ -5,7 +5,8 @@ node_js:
 
 before_install:
   - npm install -g truffle
+  - npm install -g ganache-cli
 
 script:
-  - truffle develop > ./ganache-cli.log 2>&1 &
+  - ganache-cli > ./ganache-cli.log 2>&1 &
   - truffle test --network travisci
