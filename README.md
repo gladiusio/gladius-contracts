@@ -1,6 +1,6 @@
 # Gladius Marketplace Backend
 
-[![Build Status](https://travis-ci.com/gladiusio/gladius-marketplace-backend.svg?token=DZTxBr3af1FsUxy8yWoy&branch=dev)](https://travis-ci.com/gladiusio/gladius-marketplace-backend)
+[![Build Status](https://travis-ci.org/gladiusio/gladius-marketplace-backend.svg?branch=master)](https://travis-ci.org/gladiusio/gladius-marketplace-backend)
 
 ## Installation & Testing
 
