@@ -24,20 +24,19 @@ contract Pool {
         string publicKey;
     }
 
-        //pool.allocateClientFundsFrom(msg.sender, allocationAmount)
     struct Balance {
-      uint256 total;                                 // Total balance        - Complete Balance
-      uint256 available;                             // Available Balance    - Allocatable Balance
-      uint256 transactionCosts;                      // Market Fee Balance   - Balance to hold transaction fees
-      uint256 workable;                              // Work Balance         - Allocated Balance
-      uint256 completed;                             // Work Completed       - Work completed balance
-      uint256 transferrable;                         // Payout Balance       - Balance able to withdraw
-      uint256 withdrawable;                          // Payout Balance       - Balance able to withdraw
+      uint256 total;                                  // Total balance        - Complete Balance
+      uint256 available;                              // Available Balance    - Allocatable Balance
+      uint256 transactionCosts;                       // Market Fee Balance   - Balance to hold transaction fees
+      uint256 workable;                               // Work Balance         - Allocated Balance
+      uint256 completed;                              // Work Completed       - Work completed balance
+      uint256 transferrable;                          // Payout Balance       - Balance able to withdraw
+      uint256 withdrawable;                           // Payout Balance       - Balance able to withdraw
     }
 
     PoolData data;
-    Client client;              // Later versions will support multiple clients
-    string clientData = "";     // Encrypted data for the client
+    Client client;                                    // Later versions will support multiple clients
+    string clientData = "";                           // Encrypted data for the client
 
     mapping (address => Node) proposals;
     mapping (address => Client) clientRequests;
@@ -93,7 +92,7 @@ contract Pool {
     }
 
     function getClientBalance(address _client) public returns (uint256) {
-        return clientBalance[_client].total;
+        return clientBalance[_client];
     }
 
     function allocateClientFundsFrom(address _client, uint256 amount) public returns (bool) {
@@ -105,11 +104,11 @@ contract Pool {
         clientBalance[_client] = (Balance({
             total : _clientBalance.total + amount,
             available : _clientBalance.available + availableBalance,
-            transactionCosts : 0,
-            workable : 0,
-            completed : 0,
-            transferrable : 0,
-            withdrawable : 0
+            transactionCosts : _clientBalance.transactionCosts,
+            workable : _clientBalance.workable,
+            completed : _clientBalance.completed,
+            transferrable : _clientBalance.transferrable,
+            withdrawable : _clientBalanc.withdrawablee
         }));
 
         return true;
