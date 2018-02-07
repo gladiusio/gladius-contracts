@@ -1,5 +1,6 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.19;
 
+import "../libraries/Balances.sol";
 import "./Pool.sol";
 
 contract Owned {
@@ -38,22 +39,8 @@ contract Market {
     uint256 maxPayout;                                    // Max amount a pool can withdraw daily
     uint256 joinCost;                                     // Cost to join marketplace
 
-    // Ratios
+    Balances.records public balances;
 
-    // Work Ratio           - Amount set aside to work balance
-
-    // ----------------------
-
-    // Balances
-    
-    uint256 public balanceTotal;                                 // Total balance        - Complete Balance
-    uint256 public balanceAvailable;                             // Available Balance    - Allocatable Balance
-    uint256 public balanceTransactionCosts;                      // Market Fee Balance   - Balance to hold transaction fees
-    uint256 public balanceWorkable;                              // Work Balance         - Allocated Balance
-    uint256 public balanceCompleted;                             // Work Completed       - Work completed balance
-    uint256 public balancePayable;                               // Payout Balance       - Balance able to withdraw
-
-    uint256 public balanceWithdrawable;                          // Payout Balance       - Balance able to withdraw
     Token gladiusToken;
 
     /**
@@ -86,7 +73,7 @@ contract Market {
         return newPool;
     }
 
-    function getOwnedPools(address ownerAddress) public returns (Pool[]) {
+    function getOwnedPools(address ownerAddress) public view returns (Pool[]) {
       return ownedPools[ownerAddress];
     }
 
@@ -106,7 +93,7 @@ contract Market {
      * Require that the pool's owner is the sender
      * Checks account balance and transfers money from the sender to the pool's address for the join cost
      * Creates a pool instance from the address and pushes the pool to the market place pools
-     * 
+     *
      * @param poolAddress Param Description
      */
     function joinMarketplace(address poolAddress) public returns(bool) {
@@ -121,20 +108,22 @@ contract Market {
     }
 
     function allocateClientFundsTo(address poolAddress, address userAddress, uint32 allocationAmount) public returns (bool) {
-        uint256 _balanceTotal = allocationAmount;
-        uint256 _balanceAvailable = (3 * allocationAmount) / 5;
-        uint256 _balanceWorkable = allocationAmount - _balanceAvailable;
-        uint256 _balanceWithdrawable = 0;
-        uint256 _balanceCompleted = 0;
-        uint256 _balancePayable = 0;
+        uint256 _total = allocationAmount;
+        uint256 _available = (3 * allocationAmount) / 5;
+        uint256 _transactionCosts = 0; // TODO transaction cost calculation
+        uint256 _workable = allocationAmount - balances.available;
+        uint256 _transferrable = 0;
+        uint256 _completed = 0;
+        uint256 _withdrawable = 0;
 
         // Allocate market funds
-        balanceTotal += _balanceTotal;
-        balanceAvailable += _balanceAvailable;
-        balanceWorkable += _balanceWorkable;
-        balanceWithdrawable += _balanceWithdrawable;
-        balanceCompleted += _balanceCompleted;
-        balancePayable += _balancePayable;
+        balances.total += _total;
+        balances.available += _available;
+        balances.transactionCosts += _transactionCosts;
+        balances.workable += _workable;
+        balances.transferrable += _transferrable;
+        balances.completed += _completed;
+        balances.withdrawable += _withdrawable;
 
         Pool pool = Pool(poolAddress);
         // Allocate pool balance
