@@ -1,4 +1,6 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.19;
+
+import "../libraries/Balances.sol";
 
 contract Pool {
 
@@ -6,7 +8,7 @@ contract Pool {
     struct PoolData {
         mapping (address => string) encryptedPoolData;
         mapping (address => Node) members;
-        
+
         bytes32[] nameServers;
         string publicKey;
         address[] membersList;
@@ -24,27 +26,16 @@ contract Pool {
         string publicKey;
     }
 
-        //pool.allocateClientFundsFrom(msg.sender, allocationAmount)
-    struct Balance {
-      uint256 total;                                 // Total balance        - Complete Balance
-      uint256 available;                             // Available Balance    - Allocatable Balance
-      uint256 transactionCosts;                      // Market Fee Balance   - Balance to hold transaction fees
-      uint256 workable;                              // Work Balance         - Allocated Balance
-      uint256 completed;                             // Work Completed       - Work completed balance
-      uint256 transferrable;                         // Payout Balance       - Balance able to withdraw
-      uint256 withdrawable;                          // Payout Balance       - Balance able to withdraw
-    }
-
     PoolData data;
     Client client;              // Later versions will support multiple clients
     string clientData = "";     // Encrypted data for the client
 
     mapping (address => Node) proposals;
     mapping (address => Client) clientRequests;
-    mapping (address => Balance) clientBalance;
+    mapping (address => Balances.records) clientBalance;
 
     address[] private proposedAddresses;
-    
+
 
     /**
      * Create new Pool and assign owner
@@ -92,17 +83,17 @@ contract Pool {
         });
     }
 
-    function getClientBalance(address _client) public returns (uint256) {
+    function getClientBalance(address _client) public view returns (uint256) {
         return clientBalance[_client].total;
     }
 
     function allocateClientFundsFrom(address _client, uint256 amount) public returns (bool) {
-        Balance _clientBalance = clientBalance[_client]; // Grabs balance or a zeroed out struct
+        Balances.records storage _clientBalance = clientBalance[_client]; // Grabs balance or a zeroed out struct
 
         uint256 availableBalance = (3 * amount) / 5;
-        uint256 workableBalance = amount - availableBalance;
-     
-        clientBalance[_client] = (Balance({
+        /* uint256 workableBalance = amount - availableBalance; */
+
+        clientBalance[_client] = (Balances.records({
             total : _clientBalance.total + amount,
             available : _clientBalance.available + availableBalance,
             transactionCosts : 0,
