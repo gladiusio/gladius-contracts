@@ -1,8 +1,8 @@
 pragma solidity ^0.4.19;
 
-import "../libraries/Balances.sol";
+import "./Balance.sol";
 
-contract Pool {
+contract Pool is AbstractBalance {
 
     // Data about a pool
     struct PoolData {
@@ -32,7 +32,8 @@ contract Pool {
 
     mapping (address => Node) proposals;
     mapping (address => Client) clientRequests;
-    mapping (address => Balances.records) clientBalance;
+    // Maps a client's address to a balance struct
+    mapping (address => Balance) clientBalance;
 
     address[] private proposedAddresses;
 
@@ -83,24 +84,25 @@ contract Pool {
         });
     }
 
-    function getClientBalance(address _client) public returns (uint256) {
-        return clientBalance[_client];
+    function getClientBalance(address _client) public view returns (uint256,uint256,uint256,uint256,uint256,uint256,uint256) {
+      return (clientBalance[_client].total, clientBalance[_client].available, clientBalance[_client].transactionCosts, clientBalance[_client].workable, clientBalance[_client].completed, clientBalance[_client].transferrable, clientBalance[_client].withdrawable);
+        /* Nope -> return clientBalance[_client]; We have this instead.. ^ */
     }
 
     function allocateClientFundsFrom(address _client, uint256 amount) public returns (bool) {
-        Balances.records storage _clientBalance = clientBalance[_client]; // Grabs balance or a zeroed out struct
+        Balance storage _clientBalance = clientBalance[_client]; // Grabs balance or a zeroed out struct
 
         uint256 availableBalance = (3 * amount) / 5;
-        /* uint256 workableBalance = amount - availableBalance; */
+        uint256 workableBalance = amount - availableBalance;
 
-        clientBalance[_client] = (Balances.records({
+        clientBalance[_client] = (Balance({
             total : _clientBalance.total + amount,
             available : _clientBalance.available + availableBalance,
             transactionCosts : _clientBalance.transactionCosts,
-            workable : _clientBalance.workable,
+            workable : _clientBalance.workable + workableBalance,
             completed : _clientBalance.completed,
             transferrable : _clientBalance.transferrable,
-            withdrawable : _clientBalanc.withdrawablee
+            withdrawable : _clientBalance.withdrawable
         }));
 
         return true;

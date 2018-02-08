@@ -1,24 +1,7 @@
 pragma solidity ^0.4.19;
 
-import "../libraries/Balances.sol";
 import "./Pool.sol";
-
-contract Owned {
-    function owned() public { owner = msg.sender; }
-    address owner;
-
-    // This contract only defines a modifier but does not use
-    // it: it will be used in derived contracts.
-    // The function body is inserted where the special symbol
-    // `_;` in the definition of a modifier appears.
-    // This means that if the owner calls this function, the
-    // function is executed and otherwise, an exception is
-    // thrown.
-    modifier onlyOwner {
-        require(msg.sender == owner);
-        _;
-    }
-}
+import "./Balance.sol";
 
 /// Maps functions of Gladius Token to the base Token contract
 contract Token {
@@ -27,7 +10,7 @@ contract Token {
     function transferFrom(address _from, address _to, uint256 _value) public returns (bool success);
 }
 
-contract Market {
+contract Market is AbstractBalance {
 
     mapping(address => Pool[]) public marketPools;        // All Pools in marketplace, ignores non-market Pools
     mapping(address => Pool[]) public ownedPools;         // All Pools created off this contract, regardless of listing in marketplace
@@ -39,7 +22,7 @@ contract Market {
     uint256 maxPayout;                                    // Max amount a pool can withdraw daily
     uint256 joinCost;                                     // Cost to join marketplace
 
-    Balances.records public balances;
+    Balance public balance;
 
     Token gladiusToken;
 
@@ -111,19 +94,19 @@ contract Market {
         uint256 _total = allocationAmount;
         uint256 _available = (3 * allocationAmount) / 5;
         uint256 _transactionCosts = 0; // TODO transaction cost calculation
-        uint256 _workable = allocationAmount - balances.available;
+        uint256 _workable = allocationAmount - _available;
         uint256 _transferrable = 0;
         uint256 _completed = 0;
         uint256 _withdrawable = 0;
 
         // Allocate market funds
-        balances.total += _total;
-        balances.available += _available;
-        balances.transactionCosts += _transactionCosts;
-        balances.workable += _workable;
-        balances.transferrable += _transferrable;
-        balances.completed += _completed;
-        balances.withdrawable += _withdrawable;
+        balance.total += _total;
+        balance.available += _available;
+        balance.transactionCosts += _transactionCosts;
+        balance.workable += _workable;
+        balance.transferrable += _transferrable;
+        balance.completed += _completed;
+        balance.withdrawable += _withdrawable;
 
         Pool pool = Pool(poolAddress);
         // Allocate pool balance
