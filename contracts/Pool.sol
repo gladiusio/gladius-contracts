@@ -1,12 +1,14 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.19;
 
-contract Pool {
+import "./Balance.sol";
+
+contract Pool is AbstractBalance {
 
     // Data about a pool
     struct PoolData {
         mapping (address => string) encryptedPoolData;
         mapping (address => Node) members;
-        
+
         bytes32[] nameServers;
         string publicKey;
         address[] membersList;
@@ -25,13 +27,16 @@ contract Pool {
     }
 
     PoolData data;
-    Client client;              // Later versions will support multiple clients
-    string clientData = "";     // Encrypted data for the client
+    Client client;                                    // Later versions will support multiple clients
+    string clientData = "";                           // Encrypted data for the client
 
     mapping (address => Node) proposals;
     mapping (address => Client) clientRequests;
+    // Maps a client's address to a balance struct
+    mapping (address => Balance) clientBalance;
 
     address[] private proposedAddresses;
+
 
     /**
      * Create new Pool and assign owner
@@ -77,6 +82,30 @@ contract Pool {
             encryptedData : encryptedData,
             publicKey : publicKey
         });
+    }
+
+    function getClientBalance(address _client) public view returns (uint256,uint256,uint256,uint256,uint256,uint256,uint256) {
+      return (clientBalance[_client].total, clientBalance[_client].available, clientBalance[_client].transactionCosts, clientBalance[_client].workable, clientBalance[_client].completed, clientBalance[_client].transferrable, clientBalance[_client].withdrawable);
+        /* Nope -> return clientBalance[_client]; We have this instead.. ^ */
+    }
+
+    function allocateClientFundsFrom(address _client, uint256 amount) public returns (bool) {
+        Balance storage _clientBalance = clientBalance[_client]; // Grabs balance or a zeroed out struct
+
+        uint256 availableBalance = (3 * amount) / 5;
+        uint256 workableBalance = amount - availableBalance;
+
+        clientBalance[_client] = (Balance({
+            total : _clientBalance.total + amount,
+            available : _clientBalance.available + availableBalance,
+            transactionCosts : _clientBalance.transactionCosts,
+            workable : _clientBalance.workable + workableBalance,
+            completed : _clientBalance.completed,
+            transferrable : _clientBalance.transferrable,
+            withdrawable : _clientBalance.withdrawable
+        }));
+
+        return true;
     }
 
     function authorizeClient(address clientAddress) public {
@@ -128,8 +157,8 @@ contract Pool {
     /// Make proposal
     function proposeNode(address node, string publicKey, string eData) public {
         proposals[node] = (Node({
-        encryptedData : eData,
-        publicKey : publicKey
+          encryptedData : eData,
+          publicKey : publicKey
         }));
         proposedAddresses.push(node);
     }

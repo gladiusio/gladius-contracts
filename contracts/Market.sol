@@ -1,23 +1,7 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.19;
 
 import "./Pool.sol";
-
-contract Owned {
-    function owned() public { owner = msg.sender; }
-    address owner;
-
-    // This contract only defines a modifier but does not use
-    // it: it will be used in derived contracts.
-    // The function body is inserted where the special symbol
-    // `_;` in the definition of a modifier appears.
-    // This means that if the owner calls this function, the
-    // function is executed and otherwise, an exception is
-    // thrown.
-    modifier onlyOwner {
-        require(msg.sender == owner);
-        _;
-    }
-}
+import "./Balance.sol";
 
 /// Maps functions of Gladius Token to the base Token contract
 contract Token {
@@ -26,7 +10,7 @@ contract Token {
     function transferFrom(address _from, address _to, uint256 _value) public returns (bool success);
 }
 
-contract Market {
+contract Market is AbstractBalance {
 
     mapping(address => Pool[]) public marketPools;        // All Pools in marketplace, ignores non-market Pools
     mapping(address => Pool[]) public ownedPools;         // All Pools created off this contract, regardless of listing in marketplace
@@ -34,9 +18,11 @@ contract Market {
     mapping(address => address) public poolToOwner;       // Owner of a Pool
     mapping(address => uint32) tokensPaid;                // Account balance of the clients
 
-    address public owner;                                        // Owner of the market
+    address public owner;                                 // Owner of the market
     uint256 maxPayout;                                    // Max amount a pool can withdraw daily
     uint256 joinCost;                                     // Cost to join marketplace
+
+    Balance public balance;
 
     Token gladiusToken;
 
@@ -70,7 +56,7 @@ contract Market {
         return newPool;
     }
 
-    function getOwnedPools(address ownerAddress) public returns (Pool[]) {
+    function getOwnedPools(address ownerAddress) public view returns (Pool[]) {
       return ownedPools[ownerAddress];
     }
 
@@ -90,7 +76,7 @@ contract Market {
      * Require that the pool's owner is the sender
      * Checks account balance and transfers money from the sender to the pool's address for the join cost
      * Creates a pool instance from the address and pushes the pool to the market place pools
-     * 
+     *
      * @param poolAddress Param Description
      */
     function joinMarketplace(address poolAddress) public returns(bool) {
@@ -104,18 +90,26 @@ contract Market {
         return true;
     }
 
-    /**
-     * WIP
-     * Owner can withdraw money from their pool
-     * Only the owner of a pool can withdraw money from its pool
-     * Gladius must be able to withdraw money from listing a pool on the marketplace
-     * 
-     * @param amount Amount the owver wants to withdraw
-     */
-    // function withdraw(uint256 amount) public returns(bool){
-    //     if( msg.sender == owner)
-    //         return true;
-    //     else
-    //         return false;
-    // }
+    function allocateClientFundsTo(address poolAddress, address userAddress, uint32 allocationAmount) public returns (bool) {
+        uint256 _total = allocationAmount;
+        uint256 _available = (3 * allocationAmount) / 5;
+        uint256 _transactionCosts = 0; // TODO transaction cost calculation
+        uint256 _workable = allocationAmount - _available;
+        uint256 _transferrable = 0;
+        uint256 _completed = 0;
+        uint256 _withdrawable = 0;
+
+        // Allocate market funds
+        balance.total += _total;
+        balance.available += _available;
+        balance.transactionCosts += _transactionCosts;
+        balance.workable += _workable;
+        balance.transferrable += _transferrable;
+        balance.completed += _completed;
+        balance.withdrawable += _withdrawable;
+
+        Pool pool = Pool(poolAddress);
+        // Allocate pool balance
+        return pool.allocateClientFundsFrom(userAddress, allocationAmount);
+    }
 }
