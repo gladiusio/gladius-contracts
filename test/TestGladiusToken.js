@@ -1,4 +1,3 @@
-// Specifically request an abstraction for MetaCoin
 let Pool = artifacts.require('Pool')
 let Market = artifacts.require('Market')
 let GladiusToken = artifacts.require('GladiusToken')
@@ -17,7 +16,7 @@ contract('GladiusToken', function(accounts) {
       let gladiusSymbol = await gladius.symbol.call()
       assert.equal(gladiusSymbol, 'GLA', 'Token constructor did not initialize correctly')
     })
-    
+
     // Test creation of tokens
     it('Deploy Tokens to Creator\'s Account', async function() {
       let gladius = await GladiusToken.deployed()
