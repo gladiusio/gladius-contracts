@@ -1,6 +1,6 @@
 pragma solidity ^0.4.19;
 
-import "./Balance.sol";
+import "./AbstractBalance.sol";
 
 contract Pool is AbstractBalance {
 
@@ -89,14 +89,16 @@ contract Pool is AbstractBalance {
         /* Nope -> return clientBalance[_client]; We have this instead.. ^ */
     }
 
-    function allocateClientFundsFrom(address _client, uint256 amount) public returns (bool) {
+    function allocateClientFundsFrom(address _client, uint256 _amount) public returns (bool) {
+        allocateFunds(_amount);
+
         Balance storage _clientBalance = clientBalance[_client]; // Grabs balance or a zeroed out struct
 
-        uint256 availableBalance = (3 * amount) / 5;
-        uint256 workableBalance = amount - availableBalance;
+        uint256 availableBalance = (3 * _amount) / 5;
+        uint256 workableBalance = _amount - availableBalance;
 
         clientBalance[_client] = (Balance({
-            total : _clientBalance.total + amount,
+            total : _clientBalance.total + _amount,
             available : _clientBalance.available + availableBalance,
             transactionCosts : _clientBalance.transactionCosts,
             workable : _clientBalance.workable + workableBalance,

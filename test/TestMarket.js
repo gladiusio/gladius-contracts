@@ -71,6 +71,17 @@ contract('Market', function(accounts) {
       console.log("Transferrable: " + clientBalance[5].toNumber())
       console.log("Withdrawable: " + clientBalance[6].toNumber())
 
+      let poolBalance = await userOwnedPool.getBalance()
+
+      console.log("\n\n------ Pool Balance ------")
+      console.log("Total: " + poolBalance[0].toNumber())
+      console.log("Available: " + poolBalance[1].toNumber())
+      console.log("TransactionCosts: " + poolBalance[2].toNumber())
+      console.log("Workable: " + poolBalance[3].toNumber())
+      console.log("Completed: " + poolBalance[4].toNumber())
+      console.log("Transferrable: " + poolBalance[5].toNumber())
+      console.log("Withdrawable: " + poolBalance[6].toNumber())
+
       assert.equal(balance[0].toNumber(), amount * 2, 'Total market balance is not twice the allocated test amount')
       assert.equal(clientBalance[0].toNumber(), amount, 'Total client balance is not the allocated test amount')
       assert.equal(clientBalance[1].toNumber(), (amount * 0.6), 'Total client balance is not the allocated test amount')

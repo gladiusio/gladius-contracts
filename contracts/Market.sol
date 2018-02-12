@@ -1,7 +1,7 @@
 pragma solidity ^0.4.19;
 
 import "./Pool.sol";
-import "./Balance.sol";
+import "./AbstractBalance.sol";
 
 /// Maps functions of Gladius Token to the base Token contract
 contract Token {
@@ -17,14 +17,20 @@ contract Market is AbstractBalance {
     mapping(address => Pool) public clientToPool;         // Client that pays the Pool for service
     mapping(address => address) public poolToOwner;       // Owner of a Pool
     mapping(address => uint32) tokensPaid;                // Account balance of the clients
+    mapping(address => Withdrawal[]) public withdrawals;
 
     address public owner;                                 // Owner of the market
     uint256 maxPayout;                                    // Max amount a pool can withdraw daily
     uint256 joinCost;                                     // Cost to join marketplace
 
-    Balance public balance;
-
     Token gladiusToken;
+
+    struct Withdrawal {
+      address pool;
+      address user;
+      uint timestamp;
+      uint256 amount;
+    }
 
     /**
      * Marketplace constructor
@@ -70,6 +76,25 @@ contract Market is AbstractBalance {
         return clientToPool[client];
     }
 
+    function getWithdrawals(address _user) public view returns(Withdrawal[]) {
+        return withdrawals[_user];
+    }
+
+    function canWithdraw(address _user, uint256 _amount) returns (bool) {
+        Withdrawal userWithdrawals = withdrawals[_user];
+        // Logic 
+        return (balance.withdrawable >= _amount);
+    }
+
+    function withdraw(address _user, address _pool, uint256 _amount) {
+        // Retrieve Pool Balances
+        Pool pool = Pool(_pool);
+
+        if (pool.getBalance()[0] >= _amount) {
+
+        }
+    }
+
     /**
      * Adds the pool address to the marketplace, and charges the owner of the pool the join cost
      *
@@ -90,23 +115,8 @@ contract Market is AbstractBalance {
         return true;
     }
 
-    function allocateClientFundsTo(address poolAddress, address userAddress, uint32 allocationAmount) public returns (bool) {
-        uint256 _total = allocationAmount;
-        uint256 _available = (3 * allocationAmount) / 5;
-        uint256 _transactionCosts = 0; // TODO transaction cost calculation
-        uint256 _workable = allocationAmount - _available;
-        uint256 _transferrable = 0;
-        uint256 _completed = 0;
-        uint256 _withdrawable = 0;
-
-        // Allocate market funds
-        balance.total += _total;
-        balance.available += _available;
-        balance.transactionCosts += _transactionCosts;
-        balance.workable += _workable;
-        balance.transferrable += _transferrable;
-        balance.completed += _completed;
-        balance.withdrawable += _withdrawable;
+    function allocateClientFundsTo(address poolAddress, address userAddress, uint256 allocationAmount) public returns (bool) {
+        allocateFunds(allocationAmount);
 
         Pool pool = Pool(poolAddress);
         // Allocate pool balance
