@@ -28,8 +28,8 @@ contract Market is AbstractBalance {
     struct Withdrawal {
       address pool;
       address user;
-      uint timestamp;
       uint256 amount;
+      uint timestamp;
     }
 
     /**
@@ -80,19 +80,49 @@ contract Market is AbstractBalance {
         return withdrawals[_user];
     }
 
-    function canWithdraw(address _user, uint256 _amount) returns (bool) {
-        Withdrawal userWithdrawals = withdrawals[_user];
-        // Logic 
-        return (balance.withdrawable >= _amount);
+    function canWithdraw(address _pool, address _user, uint256 _amount) public view returns (bool) {
+        Withdrawal[] storage userWithdrawals = withdrawals[_user];
+
+        // Arbitrary number for now
+        uint256 dailyMaximum = 5;
+
+        if (_amount > dailyMaximum) {
+          return false;
+        }
+
+        if (userWithdrawals.length == 0) {
+          return true;
+        } else {
+          uint256 withdrawn = 0;
+          for(uint i = userWithdrawals.length - 1; i>=0; i++){
+              Withdrawal storage withdrawal = userWithdrawals[i];
+              if (now - withdrawal.timestamp > 86400) {
+                break;
+              } else if (_pool == withdrawal.pool) {
+                withdrawn += withdrawal.amount;
+              }
+          }
+
+          if (withdrawn < dailyMaximum && _amount < Pool(_pool).getWithdrawable()) {
+            return true;
+          } else {
+            return false;
+          }
+        }
     }
 
-    function withdraw(address _user, address _pool, uint256 _amount) {
-        // Retrieve Pool Balances
-        Pool pool = Pool(_pool);
-
-        if (pool.getBalance()[0] >= _amount) {
-
+    function withdraw(address _pool, address _user, uint256 _amount) public returns (bool) {
+        if (!canWithdraw(_pool, _user, _amount)) {
+          return false;
         }
+
+        // Do withdraw in AbstractBalance
+        Pool(_pool).withdrawFunds(_amount);
+        withdrawFunds(_amount);
+
+        withdrawals[_user].push(Withdrawal(_pool,  _user, _amount, now));
+
+        return true;
     }
 
     /**

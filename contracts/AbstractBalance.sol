@@ -20,7 +20,7 @@ contract AbstractBalance {
       uint256 _workable = _amount - _available;
       uint256 _transferrable = 0;
       uint256 _completed = 0;
-      uint256 _withdrawable = 0;
+      uint256 _withdrawable = (2 * _amount) / 5;
 
       // Allocate market funds
       balance.total += _total;
@@ -37,5 +37,13 @@ contract AbstractBalance {
 
   function getBalance() public view returns (uint256,uint256,uint256,uint256,uint256,uint256,uint256) {
       return (balance.total, balance.available, balance.transactionCosts, balance.workable, balance.completed, balance.transferrable, balance.withdrawable);
+  }
+
+  function getWithdrawable() public view returns (uint256) {
+    return balance.withdrawable;
+  }
+
+  function withdrawFunds(uint256 _amount) public {
+    balance.withdrawable -= _amount;
   }
 }
