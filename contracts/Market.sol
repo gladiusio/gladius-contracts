@@ -117,8 +117,8 @@ contract Market is AbstractBalance {
         }
 
         // Do withdraw in AbstractBalance
-        Pool(_pool).withdrawFunds(_amount);
-        withdrawFunds(_amount);
+        Pool(_pool).withdrawFunds(_amount, _user);
+        this.withdrawFunds(_amount);
 
         withdrawals[_user].push(Withdrawal(_pool,  _user, _amount, now));
 

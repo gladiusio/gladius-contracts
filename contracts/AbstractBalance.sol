@@ -7,7 +7,6 @@ contract AbstractBalance {
     uint256 transactionCosts;                      // Market Fee Balance   - Balance to hold transaction fees
     uint256 workable;                              // Work Balance         - Allocated Balance
     uint256 completed;                             // Work Completed       - Work completed balance
-    uint256 transferrable;                         // Payout Balance       - Balance able to withdraw
     uint256 withdrawable;                          // Payout Balance       - Balance able to withdraw
   }
 
@@ -15,19 +14,17 @@ contract AbstractBalance {
 
   function allocateFunds(uint256 _amount) public returns (bool) {
       uint256 _total = _amount;
-      uint256 _available = (3 * _amount) / 5;
+      uint256 _available = (2 * _amount) / 10;
+      uint256 _withdrawable = (2 * _amount) / 10;
       uint256 _transactionCosts = 0; // TODO transaction cost calculation
-      uint256 _workable = _amount - _available;
-      uint256 _transferrable = 0;
+      uint256 _workable = _amount - _available - _withdrawable;
       uint256 _completed = 0;
-      uint256 _withdrawable = (2 * _amount) / 5;
 
       // Allocate market funds
       balance.total += _total;
       balance.available += _available;
       balance.transactionCosts += _transactionCosts;
       balance.workable += _workable;
-      balance.transferrable += _transferrable;
       balance.completed += _completed;
       balance.withdrawable += _withdrawable;
 
@@ -35,8 +32,8 @@ contract AbstractBalance {
       return true;
   }
 
-  function getBalance() public view returns (uint256,uint256,uint256,uint256,uint256,uint256,uint256) {
-      return (balance.total, balance.available, balance.transactionCosts, balance.workable, balance.completed, balance.transferrable, balance.withdrawable);
+  function getBalance() public view returns (uint256,uint256,uint256,uint256,uint256,uint256) {
+      return (balance.total, balance.available, balance.transactionCosts, balance.workable, balance.completed, balance.withdrawable);
   }
 
   function getWithdrawable() public view returns (uint256) {
@@ -44,6 +41,7 @@ contract AbstractBalance {
   }
 
   function withdrawFunds(uint256 _amount) public {
+    balance.total -= _amount;
     balance.withdrawable -= _amount;
   }
 }
