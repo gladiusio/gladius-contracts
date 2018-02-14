@@ -1,6 +1,6 @@
 pragma solidity ^0.4.19;
 
-import "./Balance.sol";
+import "./AbstractBalance.sol";
 
 contract Pool is AbstractBalance {
 
@@ -33,7 +33,7 @@ contract Pool is AbstractBalance {
     mapping (address => Node) proposals;
     mapping (address => Client) clientRequests;
     // Maps a client's address to a balance struct
-    mapping (address => Balance) clientBalance;
+    mapping (address => Balance) userBalance;
 
     address[] private proposedAddresses;
 
@@ -84,25 +84,43 @@ contract Pool is AbstractBalance {
         });
     }
 
-    function getClientBalance(address _client) public view returns (uint256,uint256,uint256,uint256,uint256,uint256,uint256) {
-      return (clientBalance[_client].total, clientBalance[_client].available, clientBalance[_client].transactionCosts, clientBalance[_client].workable, clientBalance[_client].completed, clientBalance[_client].transferrable, clientBalance[_client].withdrawable);
-        /* Nope -> return clientBalance[_client]; We have this instead.. ^ */
+    function getuserBalance(address _client) public view returns (uint256,uint256,uint256,uint256,uint256,uint256) {
+      return (userBalance[_client].total, userBalance[_client].available, userBalance[_client].transactionCosts, userBalance[_client].workable, userBalance[_client].completed, userBalance[_client].withdrawable);
     }
 
-    function allocateClientFundsFrom(address _client, uint256 amount) public returns (bool) {
-        Balance storage _clientBalance = clientBalance[_client]; // Grabs balance or a zeroed out struct
+    function withdrawFunds(uint256 _amount, address _user) public {
+      withdrawFunds(_amount);
 
-        uint256 availableBalance = (3 * amount) / 5;
-        uint256 workableBalance = amount - availableBalance;
+      Balance storage _userBalance = userBalance[_user];
 
-        clientBalance[_client] = (Balance({
-            total : _clientBalance.total + amount,
-            available : _clientBalance.available + availableBalance,
-            transactionCosts : _clientBalance.transactionCosts,
-            workable : _clientBalance.workable + workableBalance,
-            completed : _clientBalance.completed,
-            transferrable : _clientBalance.transferrable,
-            withdrawable : _clientBalance.withdrawable
+      userBalance[_user] = (Balance({
+          total : _userBalance.total - _amount,
+          available : _userBalance.available,
+          transactionCosts : _userBalance.transactionCosts,
+          workable : _userBalance.workable,
+          completed : _userBalance.completed,
+          withdrawable : _userBalance.withdrawable - _amount
+      }));
+    }
+
+    function allocateClientFundsFrom(address _client, uint256 _amount) public returns (bool) {
+        allocateFunds(_amount);
+
+        Balance storage _userBalance = userBalance[_client]; // Grabs balance or a zeroed out struct
+
+        uint256 availableBalance = (2 * _amount) / 10;
+        uint256 withdrawableBalance = (2 * _amount) / 10;
+        uint256 transactionBalance = (1 * _amount) / 10;
+
+        uint256 workableBalance = _amount - availableBalance - withdrawableBalance - transactionBalance;
+
+        userBalance[_client] = (Balance({
+            total : _userBalance.total + _amount,
+            available : _userBalance.available + availableBalance,
+            transactionCosts : _userBalance.transactionCosts + transactionBalance,
+            workable : _userBalance.workable + workableBalance,
+            completed : _userBalance.completed,
+            withdrawable : _userBalance.withdrawable + availableBalance
         }));
 
         return true;
