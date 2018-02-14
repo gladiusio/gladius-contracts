@@ -110,13 +110,14 @@ contract Pool is AbstractBalance {
 
         uint256 availableBalance = (2 * _amount) / 10;
         uint256 withdrawableBalance = (2 * _amount) / 10;
+        uint256 transactionBalance = (1 * _amount) / 10;
 
-        uint256 workableBalance = _amount - availableBalance - withdrawableBalance;
+        uint256 workableBalance = _amount - availableBalance - withdrawableBalance - transactionBalance;
 
         userBalance[_client] = (Balance({
             total : _userBalance.total + _amount,
             available : _userBalance.available + availableBalance,
-            transactionCosts : _userBalance.transactionCosts,
+            transactionCosts : _userBalance.transactionCosts + transactionBalance,
             workable : _userBalance.workable + workableBalance,
             completed : _userBalance.completed,
             withdrawable : _userBalance.withdrawable + availableBalance
