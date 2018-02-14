@@ -16,8 +16,8 @@ contract AbstractBalance {
       uint256 _total = _amount;
       uint256 _available = (2 * _amount) / 10;
       uint256 _withdrawable = (2 * _amount) / 10;
-      uint256 _transactionCosts = 0; // TODO transaction cost calculation
-      uint256 _workable = _amount - _available - _withdrawable;
+      uint256 _transactionCosts = (1 * _amount) / 10;
+      uint256 _workable = _amount - _available - _withdrawable - _transactionCosts;
       uint256 _completed = 0;
 
       // Allocate market funds
