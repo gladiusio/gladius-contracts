@@ -1,12 +1,14 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.19;
 
-contract Pool {
+import "./AbstractBalance.sol";
+
+contract Pool is AbstractBalance {
 
     // Data about a pool
     struct PoolData {
         mapping (address => string) encryptedPoolData;
         mapping (address => Node) members;
-        
+
         bytes32[] nameServers;
         string publicKey;
         address[] membersList;
@@ -25,13 +27,16 @@ contract Pool {
     }
 
     PoolData data;
-    Client client;              // Later versions will support multiple clients
-    string clientData = "";     // Encrypted data for the client
+    Client client;                                    // Later versions will support multiple clients
+    string clientData = "";                           // Encrypted data for the client
 
     mapping (address => Node) proposals;
     mapping (address => Client) clientRequests;
+    // Maps a client's address to a balance struct
+    mapping (address => Balance) userBalance;
 
     address[] private proposedAddresses;
+
 
     /**
      * Create new Pool and assign owner
@@ -77,6 +82,48 @@ contract Pool {
             encryptedData : encryptedData,
             publicKey : publicKey
         });
+    }
+
+    function getuserBalance(address _client) public view returns (uint256,uint256,uint256,uint256,uint256,uint256) {
+      return (userBalance[_client].total, userBalance[_client].available, userBalance[_client].transactionCosts, userBalance[_client].workable, userBalance[_client].completed, userBalance[_client].withdrawable);
+    }
+
+    function withdrawFunds(uint256 _amount, address _user) public {
+      withdrawFunds(_amount);
+
+      Balance storage _userBalance = userBalance[_user];
+
+      userBalance[_user] = (Balance({
+          total : _userBalance.total - _amount,
+          available : _userBalance.available,
+          transactionCosts : _userBalance.transactionCosts,
+          workable : _userBalance.workable,
+          completed : _userBalance.completed,
+          withdrawable : _userBalance.withdrawable - _amount
+      }));
+    }
+
+    function allocateClientFundsFrom(address _client, uint256 _amount) public returns (bool) {
+        allocateFunds(_amount);
+
+        Balance storage _userBalance = userBalance[_client]; // Grabs balance or a zeroed out struct
+
+        uint256 availableBalance = (2 * _amount) / 10;
+        uint256 withdrawableBalance = (2 * _amount) / 10;
+        uint256 transactionBalance = (1 * _amount) / 10;
+
+        uint256 workableBalance = _amount - availableBalance - withdrawableBalance - transactionBalance;
+
+        userBalance[_client] = (Balance({
+            total : _userBalance.total + _amount,
+            available : _userBalance.available + availableBalance,
+            transactionCosts : _userBalance.transactionCosts + transactionBalance,
+            workable : _userBalance.workable + workableBalance,
+            completed : _userBalance.completed,
+            withdrawable : _userBalance.withdrawable + availableBalance
+        }));
+
+        return true;
     }
 
     function authorizeClient(address clientAddress) public {
@@ -128,8 +175,8 @@ contract Pool {
     /// Make proposal
     function proposeNode(address node, string publicKey, string eData) public {
         proposals[node] = (Node({
-        encryptedData : eData,
-        publicKey : publicKey
+          encryptedData : eData,
+          publicKey : publicKey
         }));
         proposedAddresses.push(node);
     }
