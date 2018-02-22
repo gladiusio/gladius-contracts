@@ -146,6 +146,7 @@ contract Market is AbstractBalance {
     }
 
     function allocateClientFundsTo(address poolAddress, address userAddress, uint256 allocationAmount) public returns (bool) {
+        // TODO - Allocate pool funds first to ensure marketplace should allocate
         allocateFunds(allocationAmount);
 
         Pool pool = Pool(poolAddress);

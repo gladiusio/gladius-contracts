@@ -44,4 +44,12 @@ contract AbstractBalance {
     balance.total -= _amount;
     balance.withdrawable -= _amount;
   }
+
+  // rebalance
+
+  // allocate all to work - default
+
+  // allocate all to withdrawable
+
+  // switch to normal rebalancing
 }
