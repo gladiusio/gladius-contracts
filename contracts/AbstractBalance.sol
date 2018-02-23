@@ -2,54 +2,38 @@ pragma solidity ^0.4.19;
 
 contract AbstractBalance {
   struct Balance {
-    uint256 total;                                 // Total balance        - Complete Balance
-    uint256 available;                             // Available Balance    - Allocatable Balance
-    uint256 transactionCosts;                      // Market Fee Balance   - Balance to hold transaction fees
-    uint256 workable;                              // Work Balance         - Allocated Balance
-    uint256 completed;                             // Work Completed       - Work completed balance
-    uint256 withdrawable;                          // Payout Balance       - Balance able to withdraw
+    int owed;
+    int total;
+    int completed;
+    int paid;
   }
 
   Balance public balance;
 
-  function allocateFunds(uint256 _amount) public returns (bool) {
-      uint256 _total = _amount;
-      uint256 _available = (2 * _amount) / 10;
-      uint256 _withdrawable = (2 * _amount) / 10;
-      uint256 _transactionCosts = (1 * _amount) / 10;
-      uint256 _workable = _amount - _available - _withdrawable - _transactionCosts;
-      uint256 _completed = 0;
-
+  function allocateFunds(int _amount) public {
       // Allocate market funds
-      balance.total += _total;
-      balance.available += _available;
-      balance.transactionCosts += _transactionCosts;
-      balance.workable += _workable;
-      balance.completed += _completed;
-      balance.withdrawable += _withdrawable;
+      balance.total += _amount;
+  }
 
-      // TODO add validation logic to ensure success
+  function getBalance() public view returns (int) {
+      return balance.total;
+  }
+
+  function pay(int _amount) public returns (bool) {
+      if (_amount > owed) { return false; }
+
+      owed -= _amount;
+      paid += _amount;
+
       return true;
   }
 
-  function getBalance() public view returns (uint256,uint256,uint256,uint256,uint256,uint256) {
-      return (balance.total, balance.available, balance.transactionCosts, balance.workable, balance.completed, balance.withdrawable);
+  function work(int _amount) public returns (bool) {
+      if (_amount > total) { return false; }
+      
+      total -= _amount;
+      owed += _amount;
+
+      return true;
   }
-
-  function getWithdrawable() public view returns (uint256) {
-    return balance.withdrawable;
-  }
-
-  function withdrawFunds(uint256 _amount) public {
-    balance.total -= _amount;
-    balance.withdrawable -= _amount;
-  }
-
-  // rebalance
-
-  // allocate all to work - default
-
-  // allocate all to withdrawable
-
-  // switch to normal rebalancing
 }

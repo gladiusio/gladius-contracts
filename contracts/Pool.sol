@@ -84,26 +84,11 @@ contract Pool is AbstractBalance {
         });
     }
 
-    function getuserBalance(address _client) public view returns (uint256,uint256,uint256,uint256,uint256,uint256) {
-      return (userBalance[_client].total, userBalance[_client].available, userBalance[_client].transactionCosts, userBalance[_client].workable, userBalance[_client].completed, userBalance[_client].withdrawable);
+    function getUserBalance(address _client) public view returns (uint) {
+      return userBalance[_client].total;
     }
 
-    function withdrawFunds(uint256 _amount, address _user) public {
-      withdrawFunds(_amount);
-
-      Balance storage _userBalance = userBalance[_user];
-
-      userBalance[_user] = (Balance({
-          total : _userBalance.total - _amount,
-          available : _userBalance.available,
-          transactionCosts : _userBalance.transactionCosts,
-          workable : _userBalance.workable,
-          completed : _userBalance.completed,
-          withdrawable : _userBalance.withdrawable - _amount
-      }));
-    }
-
-    function allocateClientFundsFrom(address _client, uint256 _amount) public returns (bool) {
+    function allocateFundsFrom(address _client, uint256 _amount) public returns (bool) {
         allocateFunds(_amount);
 
         Balance storage _userBalance = userBalance[_client]; // Grabs balance or a zeroed out struct
