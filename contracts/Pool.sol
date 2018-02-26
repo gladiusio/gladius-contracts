@@ -17,18 +17,20 @@ contract Pool is AbstractBalance {
 
     // Struct to store node data
     struct Node {
-        string encryptedData;   //Data to pool
+        string encryptedData;
         string publicKey;
     }
 
     struct Client {
-        string encryptedData;   //Data to pool
+        string encryptedData;
         string publicKey;
     }
 
     PoolData data;
-    Client client;                                    // Later versions will support multiple clients
-    string clientData = "";                           // Encrypted data for the client
+    // Later versions will support multiple clients
+    Client client;
+    // Encrypted data for the client
+    string clientData = "";
 
     mapping (address => Node) proposals;
     mapping (address => Client) clientRequests;
@@ -41,8 +43,8 @@ contract Pool is AbstractBalance {
     /**
      * Create new Pool and assign owner
      *
-     * Data is assigned owner and uses the owner's public key
-     * @param publicKey Owner's public RSA key to encrypt against
+     * Data is assigned owner and uses the owners public key
+     * @param publicKey Owners public RSA key to encrypt against
      * @param owner Address of the owner
      */
     function Pool(string publicKey, address owner) public {
@@ -67,7 +69,7 @@ contract Pool is AbstractBalance {
      * @param node Address of a node
      * @return publicKey RSA public key for the given node
      */
-    function getMemberPublicKey(address node) public constant returns (string){
+    function getMemberPublicKey(address node) public constant returns (string) {
         return data.members[node].publicKey;
     }
 
@@ -84,29 +86,31 @@ contract Pool is AbstractBalance {
         });
     }
 
-    function getUserBalance(address _client) public view returns (uint) {
+    function getBalanceStructFor(address _user) public view returns (uint, uint, uint, uint) {
+      return (userBalance[_user].owed, userBalance[_user].total, userBalance[_user].completed, userBalance[_user].paid);
+    }
+
+    function getTotalBalanceFor(address _client) public view returns (uint) {
       return userBalance[_client].total;
     }
 
-    function allocateFundsFrom(address _client, uint256 _amount) public returns (bool) {
+    function getOwedBalanceFor(address _node) public view returns (uint) {
+      userBalance[_node].owed;
+    }
+
+    function allocateFundsFrom(address _client, uint _amount) public returns (bool) {
         allocateFunds(_amount);
 
-        Balance storage _userBalance = userBalance[_client]; // Grabs balance or a zeroed out struct
+        Balance storage _userBalance = userBalance[_client];
 
-        uint256 availableBalance = (2 * _amount) / 10;
-        uint256 withdrawableBalance = (2 * _amount) / 10;
-        uint256 transactionBalance = (1 * _amount) / 10;
+        userBalance[_client] = Balance({
+          owed : _userBalance.owed,
+          total : _userBalance.total + _amount,
+          completed : _userBalance.completed,
+          paid : _userBalance.paid
+        });
 
-        uint256 workableBalance = _amount - availableBalance - withdrawableBalance - transactionBalance;
-
-        userBalance[_client] = (Balance({
-            total : _userBalance.total + _amount,
-            available : _userBalance.available + availableBalance,
-            transactionCosts : _userBalance.transactionCosts + transactionBalance,
-            workable : _userBalance.workable + workableBalance,
-            completed : _userBalance.completed,
-            withdrawable : _userBalance.withdrawable + availableBalance
-        }));
+        if (userBalance[_client].total != _userBalance.total + _amount) { revert(); }
 
         return true;
     }
@@ -122,19 +126,19 @@ contract Pool is AbstractBalance {
         clientData = clientDataIn;
     }
 
-    function getProposalPublicKey(address node) constant public returns (string){
+    function getProposalPublicKey(address node) constant public returns (string) {
         return proposals[node].publicKey;
     }
 
-    function getMemberData(address node) constant public returns (string){
+    function getMemberData(address node) constant public returns (string) {
         return data.members[node].encryptedData;
     }
 
-    function getProposalData(address node) constant public returns (string){
+    function getProposalData(address node) constant public returns (string) {
         return proposals[node].encryptedData;
     }
 
-    function getPoolDataForNode(address node) constant public returns (string){
+    function getPoolDataForNode(address node) constant public returns (string) {
         return data.encryptedPoolData[node];
     }
 
