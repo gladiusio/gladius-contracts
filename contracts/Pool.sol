@@ -32,8 +32,9 @@ contract Pool is AbstractBalance {
     string bio;
     string ip_address;
     string location;
-    string wallet_address;
-    int status = 2; // 0 = rejected, 1 = approved, 2 = pending
+    address wallet_address;
+    int status; // 0 = rejected, 1 = approved, 2 = pending
+    bool exists;
   }
 
   // Struct to store client data
@@ -46,8 +47,9 @@ contract Pool is AbstractBalance {
     string bio;
     string ip_address;
     string location;
-    string wallet_address;
-    int status = 2; // 0 = rejected, 1 = approved, 2 = pending
+    address wallet_address;
+    int status; // 0 = rejected, 1 = approved, 2 = pending
+    bool exists;
   }
 
   mapping (address => Balance) userBalance;         //maps a client's address to a balance struct
@@ -111,30 +113,43 @@ contract Pool is AbstractBalance {
   /** STC
   * Make a proposal to join this pool (from a node)
   *
-  * @param _node address of node
   * @param _publicKey for encryption
   * @param _data information about this node
   */
-  function applyNode(address _node, string _publicKey, string _data) public {
-    nodes[_node] = Node({
+  function applyNode(string _publicKey, string _data) public {
+    nodes[msg.sender] = Node({
       publicKey : _publicKey,
-      name : _data
+      name : _data,
+      email: "node@gladius.io",
+      bio: "hello world",
+      ip_address: "1.1.1.1",
+      location: "usa",
+      wallet_address: msg.sender,
+      status: 2,
+      exists: true
     });
-
-    node_list.push(_node);
+    node_list.push(msg.sender);
   }
 
   /** STC
   * Client calls this to apply to this pool
   *
-  * @param _dataToPool Application or any information that is being sent from the client to the pool
   * @param _publicKey RSA public key
+  * @param _data Application or any information that is being sent from the client to the pool
   */
-  function applyClient(string _dataToPool, string _publicKey) public {
-    client_proposals[msg.sender] = Client({
+  function applyClient(string _publicKey, string _data) public {
+    clients[msg.sender] = Client({
       publicKey : _publicKey,
-      name : _dataToPool //probably take this out
+      name : _data,
+      email: "client@gladius.io",
+      bio: "hello world",
+      ip_address: "1.1.1.1",
+      location: "usa",
+      wallet_address: msg.sender,
+      status: 2,
+      exists: true
     });
+    client_list.push(msg.sender);
   }
 
   //STC
@@ -190,11 +205,12 @@ contract Pool is AbstractBalance {
   /** STC
   * Set the client data variable
   *
-  * @param _clientDataIn data to send client
+  * @param _client client
+  * @param _newData newData
   */
   function updateClientData(address _client, string _newData) public {
     require(msg.sender == _client);
-    clients[_client] = _newData;
+    clients[_client].name = _newData;
   }
 
   /**
@@ -204,18 +220,18 @@ contract Pool is AbstractBalance {
   */
   function acceptNode(address _node) public {
     require(msg.sender == owner);
-    require(nodes[_node].length != 0);
+    require(nodes[_node].exists);
     nodes[_node].status = 1;
   }
 
   /**
   * Sets the client for this pool (1 client per pool in Beta)
   *
-  * @param _clientAddress
+  * @param _clientAddress clientAddress
   */
   function acceptClient(address _clientAddress) public {
     require(msg.sender == owner);
-    require(clients[_clientAddress].length != 0);
+    require(clients[_clientAddress].exists);
     clients[_clientAddress].status = 1;
     client = clients[_clientAddress];
   }
@@ -227,18 +243,18 @@ contract Pool is AbstractBalance {
   */
   function rejectNode(address _node) public {
     require(msg.sender == owner);
-    require(nodes[_node].length != 0);
+    require(nodes[_node].exists);
     nodes[_node].status = 0;
   }
 
   /**
   * Remove a member
   * Must be the owner
-  * @param _node address to be removed
+  * @param _client address to be removed
   */
-  function rejectClient(address node) public {
+  function rejectClient(address _client) public {
     require(msg.sender == owner);
-    require(clients[_client].length != 0);
+    require(clients[_client].exists);
     clients[_client].status = 0;
     //$client doesnt change but since it's status is 0 it should still work
   }
