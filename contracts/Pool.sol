@@ -86,7 +86,7 @@ contract Pool is AbstractBalance {
         });
     }
 
-    function getBalanceStructFor(address _user) public view returns (uint, uint, uint, uint) {
+    function getBalanceStructFor(address _user) public view returns (uint256,uint256,uint256,uint256) {
       return (userBalance[_user].owed, userBalance[_user].total, userBalance[_user].completed, userBalance[_user].paid);
     }
 
@@ -110,7 +110,7 @@ contract Pool is AbstractBalance {
           paid : _userBalance.paid
         });
 
-        if (userBalance[_client].total != _userBalance.total + _amount) { revert(); }
+        /* if (userBalance[_client].total != _userBalance.total + _amount) { revert(); } */
 
         return true;
     }
