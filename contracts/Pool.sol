@@ -4,99 +4,72 @@ import "./AbstractBalance.sol";
 
 contract Pool is AbstractBalance {
 
-  // Data about a pool
-  struct PoolData {
-    mapping (address => Node) members;
+  //ALL DATA VARIABLES ARE SUBJECT TO CHANGE (STC)
 
-    string publicKey;
-    bytes32[] nameServers;
-    address[] membersList;
-    address owner;
-  }
+  // Data about this pool
+
+  string publicKey;                                 //a public RSA key to encrypt against
+  bytes32[] nameServers;
+  address owner;                                    //msg.sender = marketplace; therefore we need to pass in an owner manually
+  mapping (address => string) dataForNode;          //data for the pool to send its nodes (node_address => data) STC
+  string dataForClient;                             //data for the pool to send its nodes (node_address => data) STC
+
+  Client client;                                    //client/website that is employing the pool (1 per pool for Beta)
+
+  mapping (address => Client) clients;              //client requesting pool for protection/cdn
+  mapping (address => Node) nodes;                  //node information (proposal)
+
+  address[] private client_list;                    //list of client proposals
+  address[] private node_list;                      //list of node proposals
 
   // Struct to store node data
   struct Node {
     string publicKey;
 
-    //basic information about the node (subject to change)
+    //these will be encrypted in the future and are STC
     string name;
     string email;
     string bio;
     string ip_address;
-    string location; // (derive from IP);
+    string location;
     string wallet_address;
+    int status = 2; // 0 = rejected, 1 = approved, 2 = pending
   }
 
+  // Struct to store client data
   struct Client {
     string publicKey;
-    string encryptedData;   //Data to pool
 
+    //these will be encrypted in the future and STC
+    string name;
+    string email;
+    string bio;
+    string ip_address;
+    string location;
+    string wallet_address;
+    int status = 2; // 0 = rejected, 1 = approved, 2 = pending
   }
 
-  PoolData data;
-  Client client;                                    // Later versions will support multiple clients
-  string clientData = "";                           // Encrypted data for the client
-
-
-  mapping (address => Client) clientRequests;
-  // Maps a client's address to a balance struct
-  mapping (address => Balance) userBalance;
-
-
-  mapping (address => Node) proposals;  //node information (proposal)
-  address[] private proposedAddresses;  //list of proposals
+  mapping (address => Balance) userBalance;         //maps a client's address to a balance struct
 
   /**
   * Create new Pool and assign owner
   *
   * Data is assigned owner and uses the owner's public key
-  * @param publicKey Owner's public RSA key to encrypt against
-  * @param owner Address of the owner
+  * @param _publicKey Owner's public RSA key to encrypt against
+  * @param _owner Address of the owner
   */
-  function Pool(string publicKey, address owner) public {
-    data.owner = owner;
-    data.publicKey = publicKey;
+  function Pool(string _publicKey, address _owner) public {
+    publicKey = _publicKey;
+    owner = _owner;
   }
 
-  /**
-  * Sets the nameServers for the Pool
-  *
-  * Ensure that the sender is the data owner before allowing changes
-  * @param nameServers Name Servers for the Pool
-  */
-  function setNameServers(bytes32[] nameServers) public {
-    require(msg.sender == data.owner);
-    data.nameServers = nameServers;
-  }
-
-  /**
-  * Return the public key for a node member of a node
-  *
-  * @param node Address of a node
-  * @return publicKey RSA public key for the given node
-  */
-  function getMemberPublicKey(address node) public constant returns (string){
-    return data.members[node].publicKey;
-  }
-
-  /**
-  * Stores the client encrypted data and the public key
-  *
-  * @param encryptedData Encrypted data payload
-  * @param publicKey RSA public key
-  */
-  function clientRequest(string encryptedData, string publicKey) public {
-    clientRequests[msg.sender] = Client({
-      encryptedData : encryptedData,
-      publicKey : publicKey
-      });
-    }
-
-    function getuserBalance(address _client) public view returns (uint256,uint256,uint256,uint256,uint256,uint256) {
+  //TO BE REVISED BY NATE STC
+  function getuserBalance(address _client) public view returns (uint256,uint256,uint256,uint256,uint256,uint256) {
       return (userBalance[_client].total, userBalance[_client].available, userBalance[_client].transactionCosts, userBalance[_client].workable, userBalance[_client].completed, userBalance[_client].withdrawable);
-    }
+  }
 
-    function withdrawFunds(uint256 _amount, address _user) public {
+  function withdrawFunds(uint256 _amount, address _user) public {
       withdrawFunds(_amount);
 
       Balance storage _userBalance = userBalance[_user];
@@ -109,106 +82,164 @@ contract Pool is AbstractBalance {
         completed : _userBalance.completed,
         withdrawable : _userBalance.withdrawable - _amount
         }));
-      }
+  }
 
-      function allocateClientFundsFrom(address _client, uint256 _amount) public returns (bool) {
-        allocateFunds(_amount);
+  function allocateClientFundsFrom(address _client, uint256 _amount) public returns (bool) {
+    allocateFunds(_amount);
 
-        Balance storage _userBalance = userBalance[_client]; // Grabs balance or a zeroed out struct
+    Balance storage _userBalance = userBalance[_client]; // Grabs balance or a zeroed out struct
 
-        uint256 availableBalance = (2 * _amount) / 10;
-        uint256 withdrawableBalance = (2 * _amount) / 10;
-        uint256 transactionBalance = (1 * _amount) / 10;
+    uint256 availableBalance = (2 * _amount) / 10;
+    uint256 withdrawableBalance = (2 * _amount) / 10;
+    uint256 transactionBalance = (1 * _amount) / 10;
 
-        uint256 workableBalance = _amount - availableBalance - withdrawableBalance - transactionBalance;
+    uint256 workableBalance = _amount - availableBalance - withdrawableBalance - transactionBalance;
 
-        userBalance[_client] = (Balance({
-          total : _userBalance.total + _amount,
-          available : _userBalance.available + availableBalance,
-          transactionCosts : _userBalance.transactionCosts + transactionBalance,
-          workable : _userBalance.workable + workableBalance,
-          completed : _userBalance.completed,
-          withdrawable : _userBalance.withdrawable + availableBalance
-          }));
+    userBalance[_client] = (Balance({
+      total : _userBalance.total + _amount,
+      available : _userBalance.available + availableBalance,
+      transactionCosts : _userBalance.transactionCosts + transactionBalance,
+      workable : _userBalance.workable + workableBalance,
+      completed : _userBalance.completed,
+      withdrawable : _userBalance.withdrawable + availableBalance
+      }));
 
-          return true;
-        }
+      return true;
+  }
+  //TO BE REVISED BY NATE STC
 
-        function authorizeClient(address clientAddress) public {
-          require(msg.sender == data.owner);
-          client = clientRequests[clientAddress];
-        }
+  /** STC
+  * Make a proposal to join this pool (from a node)
+  *
+  * @param _node address of node
+  * @param _publicKey for encryption
+  * @param _data information about this node
+  */
+  function applyNode(address _node, string _publicKey, string _data) public {
+    nodes[_node] = Node({
+      publicKey : _publicKey,
+      name : _data
+    });
 
-        // Set the encrypted data for the client to decrypt
-        function setClientData(string clientDataIn) public {
-          require(msg.sender == data.owner);
-          clientData = clientDataIn;
-        }
+    node_list.push(_node);
+  }
 
-        function getProposalPublicKey(address node) constant public returns (string){
-          return proposals[node].publicKey;
-        }
+  /** STC
+  * Client calls this to apply to this pool
+  *
+  * @param _dataToPool Application or any information that is being sent from the client to the pool
+  * @param _publicKey RSA public key
+  */
+  function applyClient(string _dataToPool, string _publicKey) public {
+    client_proposals[msg.sender] = Client({
+      publicKey : _publicKey,
+      name : _dataToPool //probably take this out
+    });
+  }
 
-        function getMemberData(address node) constant public returns (string){
-          return data.members[node]
-        }
+  //STC
+  function getNodeData(address _node) constant public returns (string){
+    return nodes[_node].name;
+  }
 
-        function getProposalData(address node) constant public returns (string){
-          return proposals[node].encryptedData;
-        }
+  //STC
+  function getClientData(address _client) constant public returns (string){
+    return clients[_client].name;
+  }
 
-        function getPoolDataForNode(address node) constant public returns (string){
-          return data.encryptedPoolData[node];
-        }
+  //STC
+  function getPoolDataForNode(address _node) constant public returns (string){
+    return dataForNode[_node];
+  }
 
-        /// Update the pool data assosiated with the Node node with data newData
-        /// Must be owner to execute
-        function updateEncryptedPoolData(address node, string newData) public {
-          require(msg.sender == data.owner);
-          data.encryptedPoolData[node] = newData;
-        }
+  //STC
+  function getPoolDataForClient(address _node) constant public returns (string){
+    return dataForNode[_node];
+  }
 
-        /// Update the encrypted member data assosiated with the Node node
-        /// Must be that member to execute
-        function updateEncryptedMemberData(address node, string newData) public {
-          require(msg.sender == node);
-          data.members[node].encryptedData = newData;
-        }
+  function getNodes() constant public returns (address[]) {
+    return node_list;
+  }
 
-        // Get the data about a proposed node
-        function getProposedNodeData(address node) constant public returns (string) {
-          return proposals[node].encryptedData;
-        }
+  function getClients() constant public returns (address[]) {
+    return client_list;
+  }
 
-        /// Make proposal
-        function proposeNode(address node, string publicKey, string eData) public {
-          proposals[node] = (Node({
-            encryptedData : eData,
-            publicKey : publicKey
-            }));
-            proposedAddresses.push(node);
-          }
+  /** STC
+  * Update the pool data for a node
+  * Must be pool owner to execute
+  * @param _node node to update
+  * @param _newData data to set for this node
+  */
+  function updateDataForNode(address _node, string _newData) public {
+    require(msg.sender == owner);
+    dataForNode[_node] = _newData;
+  }
 
-          /// Return a list of addresses of the proposals
-          function getProposals() constant public returns (address[]) {
-            return proposedAddresses;
-          }
+  /**
+  * Update the data inside of a node
+  * Must be the node to execute
+  * @param _node node to update
+  * @param _newData data to set for this node
+  */
+  function updateNodeData(address _node, string _newData) public {
+    require(msg.sender == _node);
+    nodes[_node].name = _newData;
+  }
 
-          /// Update a member's key. Owner or that member can do it.
-          function updateMemberPublicKey(address node, string newKey) public {
-            require(msg.sender == node || msg.sender == data.owner);
-            data.members[node].publicKey = newKey;
-          }
+  /** STC
+  * Set the client data variable
+  *
+  * @param _clientDataIn data to send client
+  */
+  function updateClientData(address _client, string _newData) public {
+    require(msg.sender == _client);
+    clients[_client] = _newData;
+  }
 
-          /// Accept a node to the pool (can only be done by the owner)
-          function acceptNode(address node) public {
-            require(msg.sender == data.owner);
-            data.members[node] = (proposals[node]);
-          }
+  /**
+  * Accept a node
+  *
+  * @param _node address of the applying node
+  */
+  function acceptNode(address _node) public {
+    require(msg.sender == owner);
+    require(nodes[_node].length != 0);
+    nodes[_node].status = 1;
+  }
 
-          // Remove a node from the pool
-          function removeNode(address node) public {
-            require(msg.sender == data.owner);
-            delete data.members[node];
-          }
-        }
+  /**
+  * Sets the client for this pool (1 client per pool in Beta)
+  *
+  * @param _clientAddress
+  */
+  function acceptClient(address _clientAddress) public {
+    require(msg.sender == owner);
+    require(clients[_clientAddress].length != 0);
+    clients[_clientAddress].status = 1;
+    client = clients[_clientAddress];
+  }
+
+  /**
+  * Remove a member
+  * Must be the owner
+  * @param _node address to be removed
+  */
+  function rejectNode(address _node) public {
+    require(msg.sender == owner);
+    require(nodes[_node].length != 0);
+    nodes[_node].status = 0;
+  }
+
+  /**
+  * Remove a member
+  * Must be the owner
+  * @param _node address to be removed
+  */
+  function rejectClient(address node) public {
+    require(msg.sender == owner);
+    require(clients[_client].length != 0);
+    clients[_client].status = 0;
+    //$client doesnt change but since it's status is 0 it should still work
+  }
+}
