@@ -8,12 +8,12 @@ module.exports = {
         truffle: {
           host: "localhost",
           port: 9545,
-          network_id: "*" // Match any network id
+          network_id: "*", // Match any network id
         },
         travisci: {
             host: "localhost",
             port: 8545,
-            network_id: "*" // Match any network id
+            network_id: "*"
         },
         rinkeby: {
             host: "localhost", // Connect to geth on the specified
