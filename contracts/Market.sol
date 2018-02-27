@@ -145,7 +145,7 @@ contract Market is AbstractBalance {
 
         Pool p = Pool(poolAddress);
         marketPools[msg.sender].push(p); //add pool to the marketplace
-        marketPoolsList.push(newPool);
+        marketPoolsList.push(p);
 
         return true;
     }
