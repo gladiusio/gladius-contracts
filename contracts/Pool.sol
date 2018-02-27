@@ -1,13 +1,9 @@
 pragma solidity ^0.4.19;
 
 import "./AbstractBalance.sol";
+//ALL DATA VARIABLES ARE SUBJECT TO CHANGE (STC)
 
 contract Pool is AbstractBalance {
-
-  //ALL DATA VARIABLES ARE SUBJECT TO CHANGE (STC)
-
-  // Data about this pool
-
   string publicKey;                                 //a public RSA key to encrypt against
   bytes32[] nameServers;
   address owner;                                    //msg.sender = marketplace; therefore we need to pass in an owner manually
@@ -67,48 +63,34 @@ contract Pool is AbstractBalance {
   }
 
   //TO BE REVISED BY NATE STC
-  function getuserBalance(address _client) public view returns (uint256,uint256,uint256,uint256,uint256,uint256) {
-      return (userBalance[_client].total, userBalance[_client].available, userBalance[_client].transactionCosts, userBalance[_client].workable, userBalance[_client].completed, userBalance[_client].withdrawable);
+  function getBalanceStructFor(address _user) public view returns (uint256,uint256,uint256,uint256) {
+    return (userBalance[_user].owed, userBalance[_user].total, userBalance[_user].completed, userBalance[_user].paid);
   }
 
-  function withdrawFunds(uint256 _amount, address _user) public {
-      withdrawFunds(_amount);
+  function getTotalBalanceFor(address _client) public view returns (uint) {
+    return userBalance[_client].total;
+  }
 
-      Balance storage _userBalance = userBalance[_user];
+  function getOwedBalanceFor(address _node) public view returns (uint) {
+    userBalance[_node].owed;
+  }
 
-      userBalance[_user] = (Balance({
-        total : _userBalance.total - _amount,
-        available : _userBalance.available,
-        transactionCosts : _userBalance.transactionCosts,
-        workable : _userBalance.workable,
+  function allocateFundsFrom(address _client, uint _amount) public returns (bool) {
+      allocateFunds(_amount);
+
+      Balance storage _userBalance = userBalance[_client];
+
+      userBalance[_client] = Balance({
+        owed : _userBalance.owed,
+        total : _userBalance.total + _amount,
         completed : _userBalance.completed,
-        withdrawable : _userBalance.withdrawable - _amount
-        }));
-  }
+        paid : _userBalance.paid
+      });
 
-  function allocateClientFundsFrom(address _client, uint256 _amount) public returns (bool) {
-    allocateFunds(_amount);
-
-    Balance storage _userBalance = userBalance[_client]; // Grabs balance or a zeroed out struct
-
-    uint256 availableBalance = (2 * _amount) / 10;
-    uint256 withdrawableBalance = (2 * _amount) / 10;
-    uint256 transactionBalance = (1 * _amount) / 10;
-
-    uint256 workableBalance = _amount - availableBalance - withdrawableBalance - transactionBalance;
-
-    userBalance[_client] = (Balance({
-      total : _userBalance.total + _amount,
-      available : _userBalance.available + availableBalance,
-      transactionCosts : _userBalance.transactionCosts + transactionBalance,
-      workable : _userBalance.workable + workableBalance,
-      completed : _userBalance.completed,
-      withdrawable : _userBalance.withdrawable + availableBalance
-      }));
+      /* if (userBalance[_client].total != _userBalance.total + _amount) { revert(); } */
 
       return true;
   }
-  //TO BE REVISED BY NATE STC
 
   /** STC
   * Make a proposal to join this pool (from a node)

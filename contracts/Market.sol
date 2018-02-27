@@ -17,7 +17,7 @@ contract Market is AbstractBalance {
     mapping(address => Pool) public clientToPool;         // Client that pays the Pool for service
     mapping(address => address) public poolToOwner;       // Owner of a Pool
     mapping(address => uint32) tokensPaid;                // Account balance of the clients
-    mapping(address => Withdrawal[]) public withdrawals;
+    mapping(address => Payout[]) public payouts;
 
     address public owner;                                 // Owner of the market
     uint256 maxPayout;                                    // Max amount a pool can withdraw daily
@@ -25,7 +25,7 @@ contract Market is AbstractBalance {
 
     Token gladiusToken;
 
-    struct Withdrawal {
+    struct Payout {
       address pool;
       address user;
       uint256 amount;
@@ -36,7 +36,7 @@ contract Market is AbstractBalance {
      * Marketplace constructor
      *
      * Logic
-     * @param _owner Owner's address
+     * @param _owner Owners address
      * @param _gladiusToken GladiusToken address
      * @param _joinCost Cost to join the marketplace
      * @param _maxPayout Maxium payout to pool owners in a given day
@@ -76,12 +76,12 @@ contract Market is AbstractBalance {
         return clientToPool[client];
     }
 
-    function getWithdrawals(address _user) public view returns(Withdrawal[]) {
-        return withdrawals[_user];
+    function getPayouts(address _user) public view returns(Payout[]) {
+        return payouts[_user];
     }
 
-    function canWithdraw(address _pool, address _user, uint256 _amount) public view returns (bool) {
-        Withdrawal[] storage userWithdrawals = withdrawals[_user];
+    function canPayNode(address _pool, address _node, uint256 _amount) public view returns (bool) {
+        Payout[] storage poolPayouts = payouts[_node];
 
         // Arbitrary number for now
         uint256 dailyMaximum = 5;
@@ -90,20 +90,20 @@ contract Market is AbstractBalance {
           return false;
         }
 
-        if (userWithdrawals.length == 0) {
+        if (poolPayouts.length == 0) {
           return true;
         } else {
-          uint256 withdrawn = 0;
-          for(uint i = userWithdrawals.length - 1; i>=0; i++){
-              Withdrawal storage withdrawal = userWithdrawals[i];
-              if (now - withdrawal.timestamp > 86400) {
+          uint256 recentPayouts = 0;
+          for(uint i = poolPayouts.length - 1; i>=0; i++) {
+              Payout storage payout = poolPayouts[i];
+              if (now - payout.timestamp > 86400) {
                 break;
-              } else if (_pool == withdrawal.pool) {
-                withdrawn += withdrawal.amount;
+              } else if (_pool == payout.pool) {
+                recentPayouts += payout.amount;
               }
           }
 
-          if (withdrawn < dailyMaximum && _amount < Pool(_pool).getWithdrawable()) {
+          if (recentPayouts < dailyMaximum && _amount < Pool(_pool).getOwedBalanceFor(_node)) {
             return true;
           } else {
             return false;
@@ -111,16 +111,15 @@ contract Market is AbstractBalance {
         }
     }
 
-    function withdraw(address _pool, address _user, uint256 _amount) public returns (bool) {
-        if (!canWithdraw(_pool, _user, _amount)) {
+    function payout(address _pool, address _node, uint256 _amount) public returns (bool) {
+        if (!canPayNode(_pool, _node, _amount)) {
           return false;
         }
 
-        // Do withdraw in AbstractBalance
-        Pool(_pool).withdrawFunds(_amount, _user);
-        this.withdrawFunds(_amount);
+        // Pool(_pool).withdrawFunds(_amount, _user);
+        // this.withdrawFunds(_amount);
 
-        withdrawals[_user].push(Withdrawal(_pool,  _user, _amount, now));
+        payouts[_node].push(Payout(_pool,  _node, _amount, now));
 
         return true;
     }
@@ -146,10 +145,11 @@ contract Market is AbstractBalance {
     }
 
     function allocateClientFundsTo(address poolAddress, address userAddress, uint256 allocationAmount) public returns (bool) {
+        // TODO - Allocate pool funds first to ensure marketplace should allocate
         allocateFunds(allocationAmount);
 
         Pool pool = Pool(poolAddress);
         // Allocate pool balance
-        return pool.allocateClientFundsFrom(userAddress, allocationAmount);
+        return pool.allocateFundsFrom(userAddress, allocationAmount);
     }
 }
