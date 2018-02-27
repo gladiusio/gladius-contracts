@@ -23,3 +23,4 @@ Fake ERC-20 Token
 - Make sure to have the right port in `truffle.js`
 - Compile: `truffle compile`
 - Migrate(deploy): `truffle migrate --reset`
+- Test
