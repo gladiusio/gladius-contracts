@@ -4,7 +4,7 @@ import "./AbstractBalance.sol";
 //ALL DATA VARIABLES ARE SUBJECT TO CHANGE (STC)
 
 contract Pool is AbstractBalance {
-  string publicKey;                                 //a public RSA key to encrypt against
+  string public publicKey;                                 //a public RSA key to encrypt against
   bytes32[] nameServers;
   address owner;                                    //msg.sender = marketplace; therefore we need to pass in an owner manually
   mapping (address => string) dataForNode;          //data for the pool to send its nodes (node_address => data) STC
@@ -16,7 +16,7 @@ contract Pool is AbstractBalance {
   mapping (address => Node) nodes;                  //node information (proposal)
 
   address[] private client_list;                    //list of client proposals
-  address[] private node_list;                      //list of node proposals
+  address[] public node_list;                      //list of node proposals
 
   // Struct to store node data
   struct Node {
@@ -160,6 +160,10 @@ contract Pool is AbstractBalance {
 
   function getClients() constant public returns (address[]) {
     return client_list;
+  }
+
+  function getPublicKey() public returns (string){
+    return publicKey;
   }
 
   /** STC
