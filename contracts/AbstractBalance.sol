@@ -10,9 +10,10 @@ contract AbstractBalance {
 
   Balance public balance;
 
-  function allocateFunds(uint _amount) public {
+  function allocateFunds(uint _amount) public returns (bool) {
       // Allocate market funds
       balance.total += _amount;
+      return true;
   }
 
   function pay(uint _amount) public returns (bool) {

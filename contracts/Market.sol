@@ -80,6 +80,14 @@ contract Market is AbstractBalance {
         return clientToPool[client];
     }
 
+    function logWorkFrom(address _pool, address _node, address _client, uint _amount) public {
+        Pool pool = Pool(_pool);
+        pool.logWorkFrom(_node, _client, _amount);
+        work(_amount);
+        //require(pool.logWorkFrom(_node, _client, _amount));
+        //require(work(_amount));
+    }
+
     function getPayouts(address _user) public view returns(Payout[]) {
         return payouts[_user];
     }
@@ -120,8 +128,8 @@ contract Market is AbstractBalance {
           return false;
         }
 
-        // Pool(_pool).withdrawFunds(_amount, _user);
-        // this.withdrawFunds(_amount);
+        Pool(_pool).payout(_node, _amount);
+        pay(_amount);
 
         payouts[_node].push(Payout(_pool,  _node, _amount, now));
 

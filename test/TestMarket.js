@@ -26,56 +26,70 @@ contract('Market', function(accounts) {
     it('Pool creation and addition', async function() {
       let market = await Market.deployed()
 
-      let initialMarketPools = await market.getOwnedPools.call(user)
+      let initialMarketPools = await market.getOwnedPools(user)
 
       market.createPool('FAKE_KEY', {from: user})
       market.createPool('FAKE_KEY', {from: owner})
       market.createPool('FAKE_KEY', {from: user})
 
-      let endingMarketPools = await market.getOwnedPools.call(user)
+      let endingMarketPools = await market.getOwnedPools(user)
 
       // Assert that 2 of the 3 pools created are owned by the user
       assert.equal(initialMarketPools.length + 2, endingMarketPools.length, 'Pools added to the marketplace do not equal the market pools')
     })
 
-    // it('Pool token allocation', async function () {
-    //   let market = await Market.deployed()
-    //
-    //   let amount = 10
-    //
-    //   let userOwnedPools = await market.getOwnedPools.call(user)
-    //   let userOwnedPool = Pool.at(userOwnedPools[0])
-    //
-    //   await market.allocateClientFundsTo(userOwnedPools[0], user, amount, { from: user, gas: 999999 })
-    //
-    //   let ownerOwnedPools = await market.getOwnedPools.call(owner)
-    //   let ownerOwnedPool = Pool.at(userOwnedPools[0])
-    //
-    //   await market.allocateClientFundsTo(ownerOwnedPools[0], owner, amount, { from: owner, gas: 999999 })
-    //
-    //   // let balance = await market.balance.call()
-    //
-    //   // Keeping console.logs for debugging
-    //   console.log("\n\nAllocated 2 Clients' Funds to Marketplace...")
-    //
-    //   console.log("\n\n----- Market Balance ------")
-    //   // printBalance(balance)
-    //
-    //   // let userBalance = await userOwnedPool.getBalanceStructFor(user)
-    //   // console.log(userBalance)
-    //
-    //   // console.log(userOwnedPool.balance)
-    //   // printBalance(userBalance)
-    //
-    //   let poolBalance = await userOwnedPool.balance.call()
-    //
-    //   console.log("\n\n------ Pool Balance ------")
-    //   printBalance(poolBalance)
-    //
-    //   // assert.equal(balance[1].toNumber(), amount * 2, 'Total market balance is not twice the allocated test amount')
-    //   // assert.equal(userBalance[1].toNumber(), amount, 'Total client balance is not the allocated test amount')
-    //
-    //   assert.eqaul(poolBalance.total,10, '')
-    // })
+    it('Allocate Client funds to a Pool', async function() {
+      let market = await Market.deployed()
+
+      let amount = 10
+
+      let userOwnedPools = await market.getOwnedPools(user)
+      let userOwnedPool = Pool.at(userOwnedPools[0])
+
+      let ownerOwnedPools = await market.getOwnedPools(owner)
+      let ownerOwnedPool = Pool.at(ownerOwnedPools[0])
+
+      await market.allocateClientFundsTo(userOwnedPools[0], user, amount, { from: user })
+      await market.allocateClientFundsTo(ownerOwnedPools[0], owner, amount, { from: owner })
+      
+      let userBalance = await userOwnedPool.getBalanceStructFor(user)
+      console.log('\n\nUser Balance Sheet')
+      printBalance(userBalance)
+      
+      let ownerBalance = await ownerOwnedPool.getBalanceStructFor(owner)
+      console.log('\n\nOwner Balance Sheet')
+      printBalance(ownerBalance)
+
+      assert.equal(userBalance[1], amount, 'Amount allocated to user\'s balance does not equal ' + amount)
+      assert.equal(ownerBalance[1], amount, 'Amount allocated to owner\'s balance does not equal ' + amount)
+
+      let marketBalance = await market.balance.call()
+      console.log('\n\nMarket Balance Sheet')
+      printBalance(marketBalance)
+      assert.equal(marketBalance[1], 2 * amount, 'Amount allocated to market\'s balance does not equal ' + (2 * amount))
+    })
+
+    it('Payout Node from Pool\'s payout escrow account', async function() {
+      let market = await Market.deployed()
+
+      let amount = 1
+
+      let userOwnedPools = await market.getOwnedPools(user)
+      let userOwnedPool = Pool.at(userOwnedPools[0])
+
+      await userOwnedPool.applyNode('fake_key', 'name')
+
+      let node = await userOwnedPool.node_list.call(0)
+      console.log(node)
+      await market.logWorkFrom.call(userOwnedPools[0], node, user, amount)
+
+      let userBalance = await userOwnedPool.getBalanceStructFor(user)
+      console.log('\n\nClient Balance Sheet')
+      printBalance(userBalance)
+      
+      let nodeBalance = await userOwnedPool.getBalanceStructFor(node)
+      console.log('\n\nNode Balance Sheet')
+      printBalance(nodeBalance)
+    })
   })
 })

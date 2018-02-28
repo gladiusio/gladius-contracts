@@ -15,8 +15,8 @@ contract Pool is AbstractBalance {
   mapping (address => Client) clients;              //client requesting pool for protection/cdn
   mapping (address => Node) nodes;                  //node information (proposal)
 
-  address[] private client_list;                    //list of client proposals
-  address[] private node_list;                      //list of node proposals
+  address[] public client_list;                    //list of client proposals
+  address[] public node_list;                      //list of node proposals
 
   // Struct to store node data
   struct Node {
@@ -87,8 +87,48 @@ contract Pool is AbstractBalance {
         paid : _userBalance.paid
       });
 
-      /* if (userBalance[_client].total != _userBalance.total + _amount) { revert(); } */
+      return true;
+  }
 
+  function logWorkFrom(address _node, address _client, uint _amount) public returns (bool) {
+      Balance storage _nodeBalance = userBalance[_node];
+      Balance storage _clientBalance = userBalance[_client];
+
+      if (work(_amount) && _amount > _clientBalance.total) {
+        revert();
+      }
+
+      userBalance[_node] = Balance({
+        owed : _nodeBalance.owed + _amount,
+        total : _nodeBalance.total,
+        completed : _nodeBalance.completed,
+        paid : _nodeBalance.paid
+      });
+      
+      userBalance[_client] = Balance({
+        owed : _clientBalance.owed,
+        total : _clientBalance.total - _amount,
+        completed : _clientBalance.completed + _amount,
+        paid : _clientBalance.paid
+      });
+
+      return true;
+  }
+  
+  function payout(address _node, uint _amount) public returns (bool) {
+      Balance storage _nodeBalance = userBalance[_node];
+
+      if (pay(_amount) && _amount > _nodeBalance.owed) {
+        revert();
+      }
+
+      userBalance[_node] = Balance({
+        owed : _nodeBalance.owed - _amount,
+        total : _nodeBalance.total,
+        completed : _nodeBalance.completed,
+        paid : _nodeBalance.paid + _amount
+      });
+      
       return true;
   }
 
