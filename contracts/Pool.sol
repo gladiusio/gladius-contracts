@@ -4,7 +4,7 @@ import "./AbstractBalance.sol";
 //ALL DATA VARIABLES ARE SUBJECT TO CHANGE (STC)
 
 contract Pool is AbstractBalance {
-  string public publicKey;                                 //a public RSA key to encrypt against
+  string public publicKey;                          //a public RSA key to encrypt against
   bytes32[] nameServers;
   address owner;                                    //msg.sender = marketplace; therefore we need to pass in an owner manually
   mapping (address => string) dataForNode;          //data for the pool to send its nodes (node_address => data) STC
@@ -12,11 +12,11 @@ contract Pool is AbstractBalance {
 
   Client client;                                    //client/website that is employing the pool (1 per pool for Beta)
 
-  mapping (address => Client) clients;              //client requesting pool for protection/cdn
-  mapping (address => Node) nodes;                  //node information (proposal)
+  mapping (address => Client) private clients;       //client requesting pool for protection/cdn
+  mapping (address => Node) private nodes;           //node information (proposal)
 
-  address[] private client_list;                    //list of client proposals
-  address[] public node_list;                      //list of node proposals
+  address[] private client_list;                     //list of client proposals
+  address[] private node_list;                       //list of node proposals
 
   // Struct to store node data
   struct Node {
@@ -154,17 +154,29 @@ contract Pool is AbstractBalance {
     return dataForNode[_node];
   }
 
-  function getNodes() constant public returns (address[]) {
+  function getNodeList() constant public returns (address[]) {
     return node_list;
   }
 
-  function getClients() constant public returns (address[]) {
+  function getClientList() constant public returns (address[]) {
     return client_list;
   }
 
   function getPublicKey() public returns (string){
     return publicKey;
   }
+
+  // WIP
+
+  function getNode(address _node) public returns (address){
+    return nodes[_node].wallet_address;
+  }
+
+  function getClient(address _client) public returns (address){
+    return (clients[_client].wallet_address);
+  }
+
+  // WIP
 
   /** STC
   * Update the pool data for a node
