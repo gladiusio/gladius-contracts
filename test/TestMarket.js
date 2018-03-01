@@ -2,13 +2,6 @@ let Pool = artifacts.require('Pool')
 let Market = artifacts.require('Market')
 let GladiusToken = artifacts.require('GladiusToken')
 
-function printBalance(balance) {
-  console.log("Owed: " + balance[0].toNumber())
-  console.log("Total: " + balance[1].toNumber())
-  console.log("Completed: " + balance[2].toNumber())
-  console.log("Paid: " + balance[3].toNumber())
-}
-
 contract('Market', function(accounts) {
   // Accounts
   let owner = accounts[0]
@@ -53,19 +46,11 @@ contract('Market', function(accounts) {
       await market.allocateClientFundsTo(ownerOwnedPools[0], owner, amount, { from: owner })
       
       let userBalance = await userOwnedPool.getBalanceStructFor(user)
-      console.log('\n\nUser Balance Sheet')
-      printBalance(userBalance)
-      
       let ownerBalance = await ownerOwnedPool.getBalanceStructFor(owner)
-      console.log('\n\nOwner Balance Sheet')
-      printBalance(ownerBalance)
-
+      let marketBalance = await market.balance.call()
+      
       assert.equal(userBalance[1], amount, 'Amount allocated to user\'s balance does not equal ' + amount)
       assert.equal(ownerBalance[1], amount, 'Amount allocated to owner\'s balance does not equal ' + amount)
-
-      let marketBalance = await market.balance.call()
-      console.log('\n\nMarket Balance Sheet')
-      printBalance(marketBalance)
       assert.equal(marketBalance[1], 2 * amount, 'Amount allocated to market\'s balance does not equal ' + (2 * amount))
     })
 
@@ -80,16 +65,43 @@ contract('Market', function(accounts) {
       await userOwnedPool.applyNode('fake_key', 'name')
 
       let node = await userOwnedPool.node_list.call(0)
-      console.log(node)
-      await market.logWorkFrom.call(userOwnedPools[0], node, user, amount)
 
-      let userBalance = await userOwnedPool.getBalanceStructFor(user)
-      console.log('\n\nClient Balance Sheet')
-      printBalance(userBalance)
+      let startingPoolBalance = await userOwnedPool.balance.call()
+      let startingUserBalance = await userOwnedPool.getBalanceStructFor(user)
+      let startingNodeBalance = await userOwnedPool.getBalanceStructFor(node)
+      let startingMarketBalance = await market.balance.call()
       
+      await market.logWorkFrom(userOwnedPools[0], node, user, amount)
+
+      let poolBalance = await userOwnedPool.balance.call()
+      let userBalance = await userOwnedPool.getBalanceStructFor(user)
       let nodeBalance = await userOwnedPool.getBalanceStructFor(node)
-      console.log('\n\nNode Balance Sheet')
-      printBalance(nodeBalance)
+      let marketBalance = await market.balance.call()
+
+      // Check Market balance
+      assert.equal(marketBalance[0].toNumber(), amount, 'Market: Amount owed (expected:' + amount + ') does not equal ' + amount + ' worked')
+      assert.equal(marketBalance[1].toNumber(), startingMarketBalance[1].toNumber() - amount, 'Market: Total amount did not decrease by ' + amount)
+      assert.equal(marketBalance[2].toNumber(), amount, 'Market: Amount completed (expected:' + amount + ') does not equal ' + amount + ' completed')
+      // Check Pool Balance
+      assert.equal(poolBalance[0].toNumber(), amount, 'Pool: Amount owed (expected:' + amount + ') does not equal ' + amount + ' worked')
+      assert.equal(poolBalance[1].toNumber(), startingPoolBalance[1].toNumber() - amount, 'Pool: Total amount did not decrease by ' + amount)
+      assert.equal(poolBalance[2].toNumber(), amount, 'Pool: Amount completed (expected:' + amount + ') does not equal ' + amount + ' completed')
+      // Check Node Balance
+      assert.equal(nodeBalance[0].toNumber(), amount, 'Node: Amount owed (expected:' + amount + ') does not equal ' + amount + ' worked')
+      assert.equal(nodeBalance[1].toNumber(), startingNodeBalance[1], 'Node: Total amount changed unexpectedly')
+      assert.equal(nodeBalance[2].toNumber(), amount, 'Node: Amount completed (expected:' + amount + ') does not equal ' + amount + ' completed')
+      // Check Client Balance
+      assert.equal(userBalance[0].toNumber(), startingUserBalance[0].toNumber(), 'Client: Amount owed  changed unexpectedly')
+      assert.equal(userBalance[1].toNumber(), startingUserBalance[1].toNumber() - amount, 'Client: Total amount did not decrease by ' + amount)
+      assert.equal(userBalance[2].toNumber(), amount, 'Client: Amount completed (expected:' + amount + ') does not equal ' + amount + ' completed')
     })
   })
 })
+
+function printBalance(balance) {
+  console.log("Owed: " + balance[0].toNumber())
+  console.log("Total: " + balance[1].toNumber())
+  console.log("Completed: " + balance[2].toNumber())
+  console.log("Paid: " + balance[3].toNumber())
+}
+

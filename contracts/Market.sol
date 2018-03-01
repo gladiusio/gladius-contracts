@@ -82,10 +82,9 @@ contract Market is AbstractBalance {
 
     function logWorkFrom(address _pool, address _node, address _client, uint _amount) public {
         Pool pool = Pool(_pool);
-        pool.logWorkFrom(_node, _client, _amount);
-        work(_amount);
-        //require(pool.logWorkFrom(_node, _client, _amount));
-        //require(work(_amount));
+        
+        require(pool.logWorkFrom(_node, _client, _amount));
+        require(work(_amount));
     }
 
     function getPayouts(address _user) public view returns(Payout[]) {

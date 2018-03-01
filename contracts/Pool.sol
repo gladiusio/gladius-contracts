@@ -101,7 +101,7 @@ contract Pool is AbstractBalance {
       userBalance[_node] = Balance({
         owed : _nodeBalance.owed + _amount,
         total : _nodeBalance.total,
-        completed : _nodeBalance.completed,
+        completed : _nodeBalance.completed + _amount,
         paid : _nodeBalance.paid
       });
       

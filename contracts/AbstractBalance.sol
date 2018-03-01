@@ -30,6 +30,7 @@ contract AbstractBalance {
 
       balance.total -= _amount;
       balance.owed += _amount;
+      balance.completed += _amount;
 
       return true;
   }
