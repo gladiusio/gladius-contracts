@@ -2,7 +2,7 @@ let Pool = artifacts.require('Pool')
 let Market = artifacts.require('Market')
 let GladiusToken = artifacts.require('GladiusToken')
 
-contract('Market', function(accounts) {
+contract('Pool', function(accounts) {
   // Accounts
   let owner = accounts[0]
   let node = accounts[1]
