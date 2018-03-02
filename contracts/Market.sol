@@ -14,13 +14,13 @@ contract Market is AbstractBalance {
 
     mapping(address => Pool[]) public marketPools;        // All Pools in marketplace, ignores non-market Pools
     mapping(address => Pool[]) public ownedPools;         // All Pools created off this contract, regardless of listing in marketplace
-    mapping(address => Pool) public clientToPool;         // Client that pays the Pool for service
+    mapping(address => Pool) public clientToPool;         // Client that pays the Pool for service (KEEP THIS?)
     mapping(address => address) public poolToOwner;       // Owner of a Pool
     mapping(address => uint32) tokensPaid;                // Account balance of the clients
     mapping(address => Payout[]) public payouts;
 
-    address [] public allPoolsList;                       // Array of all pools
-    address [] public marketPoolsList;                    // Array of all pools on the marketplace
+    address[] public allPoolsList;                       // Array of all pools
+    address[] public marketPoolsList;                    // Array of all pools on the marketplace
 
     address public owner;                                 // Owner of the market
     uint256 maxPayout;                                    // Max amount a pool can withdraw daily
@@ -62,6 +62,7 @@ contract Market is AbstractBalance {
         Pool newPool = new Pool(publicKey, msg.sender);
         ownedPools[msg.sender].push(newPool);
         allPoolsList.push(newPool);
+        poolToOwner[newPool] = msg.sender;
 
         return newPool;
     }
@@ -156,5 +157,9 @@ contract Market is AbstractBalance {
         Pool pool = Pool(poolAddress);
         // Allocate pool balance
         return pool.allocateFundsFrom(userAddress, allocationAmount);
+    }
+
+    function getAllPools() public returns (address[]) {
+      return allPoolsList;
     }
 }
