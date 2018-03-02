@@ -64,7 +64,8 @@ contract('Market', function(accounts) {
 
       await userOwnedPool.applyNode('fake_key', 'name')
 
-      let node = await userOwnedPool.node_list.call(0)
+      let nodeList = await userOwnedPool.getNodeList()
+      let node = nodeList[0]
 
       let startingPoolBalance = await userOwnedPool.balance.call()
       let startingUserBalance = await userOwnedPool.getBalanceStructFor(user)
@@ -103,7 +104,8 @@ contract('Market', function(accounts) {
 
       let userOwnedPools = await market.getOwnedPools(user)
       let userOwnedPool = Pool.at(userOwnedPools[0])
-      let node = await userOwnedPool.node_list.call(0)
+      let nodeList = await userOwnedPool.getNodeList()
+      let node = nodeList[0]
 
       let startingPoolBalance = await userOwnedPool.balance.call()
       let startingUserBalance = await userOwnedPool.getBalanceStructFor(user)
@@ -148,4 +150,3 @@ function printBalance(balance) {
   console.log("Completed: " + balance[2].toNumber())
   console.log("Paid: " + balance[3].toNumber())
 }
-
