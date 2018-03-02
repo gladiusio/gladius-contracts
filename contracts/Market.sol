@@ -91,7 +91,7 @@ contract Market is AbstractBalance {
         return payouts[_user];
     }
 
-    function canPayNode(address _pool, address _node, uint256 _amount) public view returns (bool) {
+    function canPayNode(address _pool, address _node, uint256 _amount) private view returns (bool) {
         Payout[] storage poolPayouts = payouts[_node];
 
         // Arbitrary number for now
