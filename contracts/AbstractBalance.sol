@@ -2,46 +2,57 @@ pragma solidity ^0.4.19;
 
 contract AbstractBalance {
   struct Balance {
-    uint256 total;                                 // Total balance        - Complete Balance
-    uint256 available;                             // Available Balance    - Allocatable Balance
-    uint256 transactionCosts;                      // Market Fee Balance   - Balance to hold transaction fees
-    uint256 workable;                              // Work Balance         - Allocated Balance
-    uint256 completed;                             // Work Completed       - Work completed balance
-    uint256 withdrawable;                          // Payout Balance       - Balance able to withdraw
+    uint owed;
+    uint total;
+    uint completed;
+    uint paid;
   }
 
   Balance public balance;
 
-  function allocateFunds(uint256 _amount) public returns (bool) {
-      uint256 _total = _amount;
-      uint256 _available = (2 * _amount) / 10;
-      uint256 _withdrawable = (2 * _amount) / 10;
-      uint256 _transactionCosts = (1 * _amount) / 10;
-      uint256 _workable = _amount - _available - _withdrawable - _transactionCosts;
-      uint256 _completed = 0;
-
-      // Allocate market funds
-      balance.total += _total;
-      balance.available += _available;
-      balance.transactionCosts += _transactionCosts;
-      balance.workable += _workable;
-      balance.completed += _completed;
-      balance.withdrawable += _withdrawable;
-
-      // TODO add validation logic to ensure success
-      return true;
+  /**
+   * Allocate funds by incrementing the total
+   *
+   * Used to increase the total amount of funds available for the Marketplace or Pool 
+   * @param _amount The amount of funds to allocate
+   * @return bool Stub for now, but will return true / false when actual funds are used
+   */
+  function allocateFunds(uint _amount) public returns (bool) {
+    // Allocate market funds
+    balance.total += _amount;
+    return true;
   }
 
-  function getBalance() public view returns (uint256,uint256,uint256,uint256,uint256,uint256) {
-      return (balance.total, balance.available, balance.transactionCosts, balance.workable, balance.completed, balance.withdrawable);
+  /**
+   * Payout
+   *
+   * Payout and rebalance the accounts for the Marketplace or Pool
+   * @param _amount The amount of funds to allocate
+   * @return bool Stub for now, but will return true / false when actual funds are used
+   */
+  function pay(uint _amount) public returns (bool) {
+    if (_amount > balance.owed) { return false; }
+
+    balance.owed -= _amount;
+    balance.paid += _amount;
+
+    return true;
   }
 
-  function getWithdrawable() public view returns (uint256) {
-    return balance.withdrawable;
-  }
+  /**
+   * Work
+   *
+   * Allocates work amount for work that has been calculated for a node
+   * @param _amount The amount of funds to allocate
+   * @return bool Stub for now, but will return true / false when actual funds are used
+   */
+  function work(uint _amount) public returns (bool) {
+    if (_amount > balance.total) { return false; }
 
-  function withdrawFunds(uint256 _amount) public {
     balance.total -= _amount;
-    balance.withdrawable -= _amount;
+    balance.owed += _amount;
+    balance.completed += _amount;
+
+    return true;
   }
 }

@@ -1,206 +1,339 @@
 pragma solidity ^0.4.19;
 
 import "./AbstractBalance.sol";
+//ALL DATA VARIABLES ARE SUBJECT TO CHANGE (STC)
 
 contract Pool is AbstractBalance {
+  string public publicKey;                          //a public RSA key to encrypt against
+  bytes32[] nameServers;
+  address owner;                                    //msg.sender = marketplace; therefore we need to pass in an owner manually
+  mapping (address => string) dataForNode;          //data for the pool to send its nodes (node_address => data) STC
+  string dataForClient;                             //data for the pool to send its nodes (node_address => data) STC
 
-    // Data about a pool
-    struct PoolData {
-        mapping (address => string) encryptedPoolData;
-        mapping (address => Node) members;
+  Client client;                                    //client/website that is employing the pool (1 per pool for Beta)
 
-        bytes32[] nameServers;
-        string publicKey;
-        address[] membersList;
-        address owner;
+  mapping (address => Client) private clients;       //client requesting pool for protection/cdn
+  mapping (address => Node) private nodes;           //node information (proposal)
+
+  address[] private client_list;                     //list of client proposals
+  address[] private node_list;                       //list of node proposals
+
+  // Struct to store node data
+  struct Node {
+    string publicKey;
+
+    //these will be encrypted in the future and are STC
+    string name;
+    string email;
+    string bio;
+    string ip_address;
+    string location;
+    address wallet_address;
+    int status; // 0 = rejected, 1 = approved, 2 = pending
+    bool exists;
+  }
+
+  // Struct to store client data
+  struct Client {
+    string publicKey;
+
+    //these will be encrypted in the future and STC
+    string name;
+    string email;
+    string bio;
+    string ip_address;
+    string location;
+    address wallet_address;
+    int status; // 0 = rejected, 1 = approved, 2 = pending
+    bool exists;
+  }
+
+  mapping (address => Balance) userBalance;         //maps a client's address to a balance struct
+
+  /**
+   * Create new Pool and assign owner
+   *
+   * Data is assigned owner and uses the owner's public key
+   * @param _publicKey Owner's public RSA key to encrypt against
+   * @param _owner Address of the owner
+   */
+  function Pool(string _publicKey, address _owner) public {
+    publicKey = _publicKey;
+    owner = _owner;
+  }
+
+  /**
+   * Makes and returns the Balance struct for a given user
+   *
+   * @param _user User address to query userBalance array
+   * @return (uint,uint,uint,uint)
+   */
+  function getBalanceStructFor(address _user) public view returns (uint,uint,uint,uint) {
+    return (userBalance[_user].owed, userBalance[_user].total, userBalance[_user].completed, userBalance[_user].paid);
+  }
+
+  /**
+   * Returns the total from a given users balance
+   *
+   * @param _user User address to query userBalance[_user].total
+   * @return (uint)
+   */
+  function getTotalBalanceFor(address _user) public view returns (uint) {
+    return userBalance[_user].total;
+  }
+
+  /**
+   * Returns the owed balance from a given users balance
+   *
+   * @param _user User address to query userBalance[_user].owed
+   * @return (uint)
+   */
+  function getOwedBalanceFor(address _user) public view returns (uint) {
+    userBalance[_user].owed;
+  }
+
+  /**
+   * Allocates a clients funds into the Pools balance and the users balance
+   *
+   * @param _client address
+   * @param _amount uint
+   * @return bool TODO run through checks to ensure transfer logic passes
+   */
+  function allocateFundsFrom(address _client, uint _amount) public returns (bool) {
+    allocateFunds(_amount);
+
+    Balance storage _userBalance = userBalance[_client];
+
+    userBalance[_client] = Balance({
+      owed : _userBalance.owed,
+      total : _userBalance.total + _amount,
+      completed : _userBalance.completed,
+      paid : _userBalance.paid
+    });
+
+    return true;
+  }
+
+  /**
+   * Records an amount of work done by a node to the balance
+   *
+   * @param _node Node that completed the work
+   * @param _client Client that will be billed for the nodes work
+   * @param _amount Amount of work completed
+   */
+  function logWorkFrom(address _node, address _client, uint _amount) public returns (bool) {
+    Balance storage _nodeBalance = userBalance[_node];
+    Balance storage _clientBalance = userBalance[_client];
+
+    if (work(_amount) && _amount > _clientBalance.total) {
+      revert();
     }
 
-    // Struct to store node data
-    struct Node {
-        string encryptedData;   //Data to pool
-        string publicKey;
+    // Node Balance
+    userBalance[_node] = Balance({
+      owed : _nodeBalance.owed + _amount,
+      total : _nodeBalance.total,
+      completed : _nodeBalance.completed + _amount,
+      paid : _nodeBalance.paid
+    });
+
+    // Client Balance
+    userBalance[_client] = Balance({
+      owed : _clientBalance.owed,
+      total : _clientBalance.total - _amount,
+      completed : _clientBalance.completed + _amount,
+      paid : _clientBalance.paid
+    });
+
+    return true;
+  }
+
+  /**
+   * Recalculates the balances of the pool and user after a payout
+   *
+   * @param _node Node that completed the work
+   * @param _amount Amount of work completed
+   * @return bool true if withdraw was successful
+   */
+  function payout(address _node, uint _amount) public returns (bool) {
+    Balance storage _nodeBalance = userBalance[_node];
+
+    if (pay(_amount) && _amount > _nodeBalance.owed) {
+      revert();
     }
 
-    struct Client {
-        string encryptedData;   //Data to pool
-        string publicKey;
-    }
+    userBalance[_node] = Balance({
+      owed : _nodeBalance.owed - _amount,
+      total : _nodeBalance.total,
+      completed : _nodeBalance.completed,
+      paid : _nodeBalance.paid + _amount
+    });
 
-    PoolData data;
-    Client client;                                    // Later versions will support multiple clients
-    string clientData = "";                           // Encrypted data for the client
+    return true;
+  }
 
-    mapping (address => Node) proposals;
-    mapping (address => Client) clientRequests;
-    // Maps a client's address to a balance struct
-    mapping (address => Balance) userBalance;
+  /** STC
+   * Make a proposal to join this pool (from a node)
+   *
+   * @param _publicKey for encryption
+   * @param _data information about this node
+   */
+  function applyNode(string _publicKey, string _data) public {
+    nodes[msg.sender] = Node({
+      publicKey : _publicKey,
+      name : _data,
+      email: "node@gladius.io",
+      bio: "hello world",
+      ip_address: "1.1.1.1",
+      location: "usa",
+      wallet_address: msg.sender,
+      status: 2,
+      exists: true
+    });
+    node_list.push(msg.sender);
+  }
 
-    address[] private proposedAddresses;
+  /** STC
+   * Client calls this to apply to this pool
+   *
+   * @param _publicKey RSA public key
+   * @param _data Application or any information that is being sent from the client to the pool
+   */
+  function applyClient(string _publicKey, string _data) public {
+    clients[msg.sender] = Client({
+      publicKey : _publicKey,
+      name : _data,
+      email: "client@gladius.io",
+      bio: "hello world",
+      ip_address: "1.1.1.1",
+      location: "usa",
+      wallet_address: msg.sender,
+      status: 2,
+      exists: true
+    });
+    client_list.push(msg.sender);
+  }
 
+  //STC
+  function getNodeData(address _node) constant public returns (string){
+    return nodes[_node].name;
+  }
 
-    /**
-     * Create new Pool and assign owner
-     *
-     * Data is assigned owner and uses the owner's public key
-     * @param publicKey Owner's public RSA key to encrypt against
-     * @param owner Address of the owner
-     */
-    function Pool(string publicKey, address owner) public {
-        data.owner = owner;
-        data.publicKey = publicKey;
-    }
+  //STC
+  function getClientData(address _client) constant public returns (string){
+    return clients[_client].name;
+  }
 
-    /**
-     * Sets the nameServers for the Pool
-     *
-     * Ensure that the sender is the data owner before allowing changes
-     * @param nameServers Name Servers for the Pool
-     */
-    function setNameServers(bytes32[] nameServers) public {
-        require(msg.sender == data.owner);
-        data.nameServers = nameServers;
-    }
+  //STC
+  function getPoolDataForNode(address _node) constant public returns (string){
+    return dataForNode[_node];
+  }
 
-    /**
-     * Return the public key for a node member of a node
-     *
-     * @param node Address of a node
-     * @return publicKey RSA public key for the given node
-     */
-    function getMemberPublicKey(address node) public constant returns (string){
-        return data.members[node].publicKey;
-    }
+  //STC
+  function getPoolDataForClient(address _node) constant public returns (string){
+    return dataForNode[_node];
+  }
 
-    /**
-     * Stores the client encrypted data and the public key
-     *
-     * @param encryptedData Encrypted data payload
-     * @param publicKey RSA public key
-     */
-    function clientRequest(string encryptedData, string publicKey) public {
-        clientRequests[msg.sender] = Client({
-            encryptedData : encryptedData,
-            publicKey : publicKey
-        });
-    }
+  function getNodeList() constant public returns (address[]) {
+    return node_list;
+  }
 
-    function getuserBalance(address _client) public view returns (uint256,uint256,uint256,uint256,uint256,uint256) {
-      return (userBalance[_client].total, userBalance[_client].available, userBalance[_client].transactionCosts, userBalance[_client].workable, userBalance[_client].completed, userBalance[_client].withdrawable);
-    }
+  function getClientList() constant public returns (address[]) {
+    return client_list;
+  }
 
-    function withdrawFunds(uint256 _amount, address _user) public {
-      withdrawFunds(_amount);
+  function getPublicKey() public returns (string){
+    return publicKey;
+  }
 
-      Balance storage _userBalance = userBalance[_user];
+  // WIP
 
-      userBalance[_user] = (Balance({
-          total : _userBalance.total - _amount,
-          available : _userBalance.available,
-          transactionCosts : _userBalance.transactionCosts,
-          workable : _userBalance.workable,
-          completed : _userBalance.completed,
-          withdrawable : _userBalance.withdrawable - _amount
-      }));
-    }
+  function getNode(address _node) public returns (address){
+    return nodes[_node].wallet_address;
+  }
 
-    function allocateClientFundsFrom(address _client, uint256 _amount) public returns (bool) {
-        allocateFunds(_amount);
+  function getClient(address _client) public returns (address){
+    return (clients[_client].wallet_address);
+  }
 
-        Balance storage _userBalance = userBalance[_client]; // Grabs balance or a zeroed out struct
+  // WIP
 
-        uint256 availableBalance = (2 * _amount) / 10;
-        uint256 withdrawableBalance = (2 * _amount) / 10;
-        uint256 transactionBalance = (1 * _amount) / 10;
+  /** STC
+   * Update the pool data for a node
+   * Must be pool owner to execute
+   * @param _node node to update
+   * @param _newData data to set for this node
+   */
+  function updateDataForNode(address _node, string _newData) public {
+    require(msg.sender == owner);
+    dataForNode[_node] = _newData;
+  }
 
-        uint256 workableBalance = _amount - availableBalance - withdrawableBalance - transactionBalance;
+  /**
+   * Update the data inside of a node
+   * Must be the node to execute
+   * @param _node node to update
+   * @param _newData data to set for this node
+   */
+  function updateNodeData(address _node, string _newData) public {
+    require(msg.sender == _node);
+    nodes[_node].name = _newData;
+  }
 
-        userBalance[_client] = (Balance({
-            total : _userBalance.total + _amount,
-            available : _userBalance.available + availableBalance,
-            transactionCosts : _userBalance.transactionCosts + transactionBalance,
-            workable : _userBalance.workable + workableBalance,
-            completed : _userBalance.completed,
-            withdrawable : _userBalance.withdrawable + availableBalance
-        }));
+  /** STC
+   * Set the client data variable
+   *
+   * @param _client client
+   * @param _newData newData
+   */
+  function updateClientData(address _client, string _newData) public {
+    require(msg.sender == _client);
+    clients[_client].name = _newData;
+  }
 
-        return true;
-    }
+  /**
+   * Accept a node
+   *
+   * @param _node address of the applying node
+   */
+  function acceptNode(address _node) public {
+    require(msg.sender == owner);
+    require(nodes[_node].exists);
+    nodes[_node].status = 1;
+  }
 
-    function authorizeClient(address clientAddress) public {
-        require(msg.sender == data.owner);
-        client = clientRequests[clientAddress];
-    }
+  /**
+   * Sets the client for this pool (1 client per pool in Beta)
+   *
+   * @param _clientAddress clientAddress
+   */
+  function acceptClient(address _clientAddress) public {
+    require(msg.sender == owner);
+    require(clients[_clientAddress].exists);
+    clients[_clientAddress].status = 1;
+    client = clients[_clientAddress];
+  }
 
-    // Set the encrypted data for the client to decrypt
-    function setClientData(string clientDataIn) public {
-        require(msg.sender == data.owner);
-        clientData = clientDataIn;
-    }
+  /**
+   * Remove a member
+   * Must be the owner
+   * @param _node address to be removed
+   */
+  function rejectNode(address _node) public {
+    require(msg.sender == owner);
+    require(nodes[_node].exists);
+    nodes[_node].status = 0;
+  }
 
-    function getProposalPublicKey(address node) constant public returns (string){
-        return proposals[node].publicKey;
-    }
-
-    function getMemberData(address node) constant public returns (string){
-        return data.members[node].encryptedData;
-    }
-
-    function getProposalData(address node) constant public returns (string){
-        return proposals[node].encryptedData;
-    }
-
-    function getPoolDataForNode(address node) constant public returns (string){
-        return data.encryptedPoolData[node];
-    }
-
-    /// Update the pool data assosiated with the Node node with data newData
-    /// Must be owner to execute
-    function updateEncryptedPoolData(address node, string newData) public {
-        require(msg.sender == data.owner);
-        data.encryptedPoolData[node] = newData;
-    }
-
-    /// Update the encrypted member data assosiated with the Node node
-    /// Must be that member to execute
-    function updateEncryptedMemberData(address node, string newData) public {
-        require(msg.sender == node);
-        data.members[node].encryptedData = newData;
-    }
-
-    // Get the data about a proposed node
-    function getProposedNodeData(address node) constant public returns (string) {
-        return proposals[node].encryptedData;
-    }
-
-    /// Make proposal
-    function proposeNode(address node, string publicKey, string eData) public {
-        proposals[node] = (Node({
-          encryptedData : eData,
-          publicKey : publicKey
-        }));
-        proposedAddresses.push(node);
-    }
-
-    /// Return a list of addresses of the proposals
-    function getProposals() constant public returns (address[]) {
-        return proposedAddresses;
-    }
-
-    /// Update a member's key. Owner or that member can do it.
-    function updateMemberPublicKey(address node, string newKey) public {
-        require(msg.sender == node || msg.sender == data.owner);
-        data.members[node].publicKey = newKey;
-    }
-
-    /// Accept a node to the pool (can only be done by the owner)
-    function acceptNode(address node) public {
-        require(msg.sender == data.owner);
-        data.members[node] = (proposals[node]);
-    }
-
-    // Remove a node from the pool
-    function removeNode(address node) public {
-        require(msg.sender == data.owner);
-        delete data.members[node];
-    }
+  /**
+  * Remove a member
+  * Must be the owner
+  * @param _client address to be removed
+  */
+  function rejectClient(address _client) public {
+    require(msg.sender == owner);
+    require(clients[_client].exists);
+    clients[_client].status = 0;
+    //$client doesnt change but since it's status is 0 it should still work
+  }
 }
