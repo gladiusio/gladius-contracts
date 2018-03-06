@@ -9,11 +9,10 @@ contract Pool is AbstractBalance {
   string public publicKey;                           //a public RSA key to encrypt against
 
   address private owner;                                     //msg.sender = marketplace; therefore we need to pass in an owner manually
-  Client client;                                     //client/website that is employing the pool (1 per pool for Beta)
   bytes32[] nameServers;
 
-  mapping (address => Client) private clients;       //client requesting pool for protection/cdn
-  mapping (address => Node) private nodes;           //node information (proposal)
+  mapping (address => string) private clients;       //client requesting pool for protection/cdn
+  mapping (address => string) private nodes;         //node information (proposal)
 
   address[] private client_list;                     //list of client proposals
   address[] private node_list;                       //list of node proposals
@@ -146,17 +145,17 @@ contract Pool is AbstractBalance {
     return node_list;
   }
 
+  /* function getNode(address _node) public returns(Node) {
+    return nodes[_node];
+  } */
+
   function getClientList() public returns(address[]) {
     return node_list;
   }
 
-  function getNode(address _node) public returns(Node) {
-    return nodes[_node];
-  }
-
-  function getClient(address _client) public returns(Client) {
+  /* function getClient(address _client) public returns(Client) {
     return clients[_client];
-  }
+  } */
 
   /** STC
    * Make a proposal to join this pool (from a node)
@@ -164,12 +163,11 @@ contract Pool is AbstractBalance {
    * @param _publicKey for encryption
    * @param _data information about this node
    */
-  function applyNode(address _node) public {
-    require(msg.sender == _node);
-    Node _newNode = Node(_node);
+  function applyNode() public {
+    Node _newNode = Node(msg.sender);
 
-    node_list.push(_node);
-    nodes[_node] = _newNode;
+    node_list.push(msg.sender);
+    nodes[msg.sender] = _newNode.getPublicKey();
 
     _newNode.addPool();
   }
@@ -180,20 +178,14 @@ contract Pool is AbstractBalance {
    * @param _publicKey RSA public key
    * @param _data Application or any information that is being sent from the client to the pool
    */
-  function applyClient(string _publicKey, string _data) public {
-    clients[msg.sender] = Client({
-      publicKey : _publicKey,
-      name : _data,
-      email: "client@gladius.io",
-      bio: "hello world",
-      ip_address: "1.1.1.1",
-      location: "usa",
-      wallet_address: msg.sender,
-      status: 2,
-      exists: true
-    });
-    client_list.push(msg.sender);
-  }
+   function applyClient() public {
+     Client _newClient = Client(msg.sender);
+
+     client_list.push(msg.sender);
+     clients[msg.sender] = _client.getPublicKey();
+
+     _newClient.addPool();
+   }
 
   /**
    * Accept a node
@@ -202,8 +194,19 @@ contract Pool is AbstractBalance {
    */
   function acceptNode(address _node) public {
     require(msg.sender == owner);
-    require(nodes[_node].exists);
+    require(bytes(nodes[_node]).length != 0);
     nodes[_node].status = 1;
+  }
+
+  /**
+   * Sets the client for this pool (1 client per pool in Beta)
+   *
+   * @param _client clientAddress
+   */
+  function acceptClient(address _client) public {
+    require(msg.sender == owner);
+    require(bytes(clients[_client]).length != 0);
+    clients[_client].status[address(this)] = 1;
   }
 
   /**
@@ -213,20 +216,8 @@ contract Pool is AbstractBalance {
    */
   function rejectNode(address _node) public {
     require(msg.sender == owner);
-    require(nodes[_node].exists);
-    nodes[_node].status = 0;
-  }
-
-  /**
-   * Sets the client for this pool (1 client per pool in Beta)
-   *
-   * @param _clientAddress clientAddress
-   */
-  function acceptClient(address _clientAddress) public {
-    require(msg.sender == owner);
-    require(clients[_clientAddress].exists);
-    clients[_clientAddress].status = 1;
-    client = clients[_clientAddress];
+    require(bytes(nodes[_node]).length != 0);
+    nodes[_node].status[address(this)] = 0;
   }
 
   /**
@@ -236,8 +227,7 @@ contract Pool is AbstractBalance {
   */
   function rejectClient(address _client) public {
     require(msg.sender == owner);
-    require(clients[_client].exists);
-    clients[_client].status = 0;
-    //$client doesnt change but since it's status is 0 it should still work
+    require(bytes(clients[_client]).length != 0);
+    clients[_client].status[address(this)] = 0;
   }
 }
