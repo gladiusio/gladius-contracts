@@ -47,6 +47,7 @@ contract Node {
    * Apply to be a node of a pool
    *
    * @param _pool address of pool you are applying to
+   * @param _data hello
    */
   function applyToPool(address _pool, string _data) public {
     require(msg.sender == owner);
@@ -54,8 +55,8 @@ contract Node {
     Pool p = Pool(_pool);
 
     status[_pool] = 2;
-    poolData[msg.sender] = _data;
-    poolList.push(_pool);
+    poolData[address(this)] = _data;
+    poolList.push(address(this));
 
     p.addNode();
   }

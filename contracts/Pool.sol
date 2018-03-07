@@ -146,7 +146,7 @@ contract Pool is AbstractBalance {
   }
 
   function getClientList() public view returns(address[]) {
-    return node_list;
+    return client_list;
   }
 
   /**
