@@ -9,9 +9,9 @@ contract Client {
   mapping (address=>string) poolData;
   address [] poolList; //encrypted data with the POOL'S public key
 
-  function Client(string _data) public{
+  function Client(string _data, address _owner) public {
     data = _data;
-    owner = msg.sender;
+    owner = _owner;
   }
 
   function setStatus(int _status) external {

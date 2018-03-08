@@ -151,10 +151,10 @@ contract Pool is AbstractBalance {
 
   /**
    * Add a node to the list of nodes only if it's applied
-   *
+   * called by the node contract durring applyToPool
    *
    */
-  function addNode() public {
+  function addNode() external {
     Node _newNode = Node(msg.sender);
     require(_newNode.getStatus(address(this)) == 2); //make sure the node has applied to this pool
 
@@ -163,11 +163,11 @@ contract Pool is AbstractBalance {
   }
 
   /**
-   * Add a node to the list of nodes only if it's applied
-   *
+   * Add a client to the list of clients only if it's applied
+   * called by the client contract durring applyToPool
    *
    */
-  function addClient() public {
+  function addClient() external {
     Client _newClient = Client(msg.sender);
     require(_newClient.getStatus(address(this)) == 2); //make sure the client has applied to this pool
 
