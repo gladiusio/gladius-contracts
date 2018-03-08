@@ -23,6 +23,10 @@ contract Node {
     return status[_pool];
   }
 
+  function getData(address _pool) public returns(string){
+    return poolData[_pool];
+  }
+
   /**
    * change node's core data
    *
@@ -55,8 +59,8 @@ contract Node {
     Pool p = Pool(_pool);
 
     status[_pool] = 2;
-    poolData[address(this)] = _data;
-    poolList.push(address(this));
+    poolData[_pool] = _data;
+    poolList.push(_pool);
 
     p.addNode();
   }
