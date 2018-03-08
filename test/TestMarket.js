@@ -1,6 +1,8 @@
 let Pool = artifacts.require('Pool')
 let Market = artifacts.require('Market')
 let GladiusToken = artifacts.require('GladiusToken')
+let Node = artifacts.require('Node')
+let Client = artifacts.require('Client')
 
 contract('Market', function(accounts) {
   // Accounts
@@ -56,27 +58,27 @@ contract('Market', function(accounts) {
 
     it('Add work to a node\'s  balance', async function() {
       let market = await Market.deployed()
+      let node = await Node.deployed()
 
       let amount = 1
 
       let userOwnedPools = await market.getOwnedPools(user)
       let userOwnedPool = Pool.at(userOwnedPools[0])
 
-      await userOwnedPool.applyNode('fake_key', 'name')
-
-      let nodeList = await userOwnedPool.getNodeList()
-      let node = nodeList[0]
+      await node.applyToPool.sendTransaction(userOwnedPools[0], 'name', {from: user})
+      //
+      // console.log(node.address);
 
       let startingPoolBalance = await userOwnedPool.balance.call()
       let startingUserBalance = await userOwnedPool.getBalanceStructFor(user)
-      let startingNodeBalance = await userOwnedPool.getBalanceStructFor(node)
+      let startingNodeBalance = await userOwnedPool.getBalanceStructFor(node.address)
       let startingMarketBalance = await market.balance.call()
 
-      await market.logWorkFrom(userOwnedPools[0], node, user, amount)
+      await market.logWorkFrom(userOwnedPools[0], node.address, user, amount)
 
       let poolBalance = await userOwnedPool.balance.call()
       let userBalance = await userOwnedPool.getBalanceStructFor(user)
-      let nodeBalance = await userOwnedPool.getBalanceStructFor(node)
+      let nodeBalance = await userOwnedPool.getBalanceStructFor(node.address)
       let marketBalance = await market.balance.call()
 
       // Check Market balance
