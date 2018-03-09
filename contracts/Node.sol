@@ -18,12 +18,12 @@ contract Node {
     status[msg.sender] = _status;
   }
 
-  function getStatus(address _pool) public view returns(int){
+  function getStatus(address _pool) public view returns(int) {
     require(msg.sender == _pool || msg.sender == owner);
     return status[_pool];
   }
 
-  function getData(address _pool) public view returns(string){
+  function getData(address _pool) public view returns(string) {
     return poolData[_pool];
   }
 
