@@ -1,6 +1,8 @@
 let Pool = artifacts.require('Pool')
 let Market = artifacts.require('Market')
 let GladiusToken = artifacts.require('GladiusToken')
+let NodeFactory = artifacts.require('NodeFactory')
+let ClientFactory = artifacts.require('ClientFactory')
 let Node = artifacts.require('Node')
 let Client = artifacts.require('Client')
 
@@ -58,7 +60,10 @@ contract('Market', function(accounts) {
 
     it('Add work to a node\'s  balance', async function() { // jshint ignore:line
       let market = await Market.deployed()
-      let node = await Node.deployed()
+      let nFactory = await NodeFactory.deployed()
+      await nFactory.createNode.sendTransaction("node_data", {from:user})
+      let _node = await nFactory.getNodeAddress.call({from:user})
+      let node = await Node.at(_node);
 
       let amount = 1
 

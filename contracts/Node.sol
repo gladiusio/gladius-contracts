@@ -6,12 +6,12 @@ contract Node {
   string data; //encrypted data with the NODE'S public key
   address owner;
   mapping (address=>int) status; // 0 = rejected, 1 = approved, 2 = pending
-  mapping (address=>string) poolData;
-  address [] poolList; //encrypted data with the POOL'S public key
+  mapping (address=>string) poolData; //encrypted data with the POOL'S public key
+  address [] poolList;
 
-  function Node(string _data) public {
+  function Node(string _data, address _owner) public {
     data = _data;
-    owner = msg.sender;
+    owner = _owner;
   }
 
   function setStatus(int _status) external {
@@ -29,6 +29,10 @@ contract Node {
 
   function getPoolData(address _pool) public view returns(string) {
     return poolData[_pool];
+  }
+
+  function getPoolList() public view returns(address[]) {
+    return poolList;
   }
 
   /**
