@@ -9,8 +9,8 @@ let Client = artifacts.require('Client')
 contract('Node', function(accounts) {
   // Accounts
   let owner = accounts[0]
-  let nodeAddress = accounts[1]
-  let clientAddress = accounts[2]
+  let nodeAddress4 = accounts[4]
+  let clientAddress3 = accounts[7]
 
   describe('Test Node Contract', function() {
 
@@ -18,9 +18,9 @@ contract('Node', function(accounts) {
       let market = await Market.deployed()
       let nFactory = await NodeFactory.deployed()
 
-      await nFactory.createNode.sendTransaction("node1_data", {from:nodeAddress})
+      await nFactory.createNode.sendTransaction("node4_data", {from:nodeAddress4})
 
-      let _nAddress = await nFactory.getNodeAddress.call({from:nodeAddress});
+      let _nAddress = await nFactory.getNodeAddress.call({from:nodeAddress4});
 
       let node = await Node.at(_nAddress);
       let count = await nFactory.getNodeCount.call();
