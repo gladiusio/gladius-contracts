@@ -49,7 +49,7 @@ contract('Pool', async function(accounts) {
       await node.applyToPool.sendTransaction(plist[0], "celo-node1", {from: nodeAddress1})
       await client.applyToPool.sendTransaction(plist[0], "celo-client1", {from: clientAddress1})
 
-      let data = await node.getData.call(plist[0])
+      let data = await node.getPoolData.call(plist[0])
 
       let nodeList = await pool.getNodeList.call()
       let clientList = await pool.getClientList.call()
@@ -73,8 +73,8 @@ contract('Pool', async function(accounts) {
       await node.applyToPool.sendTransaction(plist[0], "celo-node2", {from: nodeAddress2})
       await client.applyToPool.sendTransaction(plist[0], "celo-client2", {from: clientAddress2})
 
-      let nodeData = await node.getData.call(plist[0])
-      let clientData = await client.getData.call(plist[0])
+      let nodeData = await node.getPoolData.call(plist[0])
+      let clientData = await client.getPoolData.call(plist[0])
 
       let count = await nFactory.getNodeCount.call();
 

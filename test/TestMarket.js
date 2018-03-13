@@ -13,14 +13,14 @@ contract('Market', function(accounts) {
 
   // Test creation of marketplace
   describe('Test Market Contract', function() {
-    it('Check Owner', async function() {
+    it('Check Owner', async function() { // jshint ignore:line
       let market = await Market.deployed()
       let marketOwner = await market.owner.call()
 
       assert.equal(marketOwner, owner, 'Market\'s owner is not the creator of the market')
-    })
+    }) // jshint ignore:line
 
-    it('Pool creation and addition', async function() {
+    it('Pool creation and addition', async function() { // jshint ignore:line
       let market = await Market.deployed()
 
       let initialMarketPools = await market.getOwnedPools(user)
@@ -33,9 +33,9 @@ contract('Market', function(accounts) {
 
       // Assert that 2 of the 3 pools created are owned by the user
       assert.equal(initialMarketPools.length + 2, endingMarketPools.length, 'Pools added to the marketplace do not equal the market pools')
-    })
+    }) // jshint ignore:line
 
-    it('Allocate Client funds to a Pool', async function() {
+    it('Allocate Client funds to a Pool', async function() { // jshint ignore:line
       let market = await Market.deployed()
 
       let amount = 10
@@ -46,8 +46,8 @@ contract('Market', function(accounts) {
       let ownerOwnedPools = await market.getOwnedPools(owner)
       let ownerOwnedPool = Pool.at(ownerOwnedPools[0])
 
-      await market.allocateClientFundsTo(userOwnedPools[0], user, amount, { from: user })
-      await market.allocateClientFundsTo(ownerOwnedPools[0], owner, amount, { from: owner })
+      await market.allocateClientFundsTo(userOwnedPools[0], user, amount, { from: user }) // jshint ignore:line
+      await market.allocateClientFundsTo(ownerOwnedPools[0], owner, amount, { from: owner }) // jshint ignore:line
 
       let userBalance = await userOwnedPool.getBalanceStructFor(user)
       let ownerBalance = await ownerOwnedPool.getBalanceStructFor(owner)
@@ -56,9 +56,9 @@ contract('Market', function(accounts) {
       assert.equal(userBalance[1], amount, 'Amount allocated to user\'s balance does not equal ' + amount)
       assert.equal(ownerBalance[1], amount, 'Amount allocated to owner\'s balance does not equal ' + amount)
       assert.equal(marketBalance[1], 2 * amount, 'Amount allocated to market\'s balance does not equal ' + (2 * amount))
-    })
+    }) // jshint ignore:line
 
-    it('Add work to a node\'s  balance', async function() {
+    it('Add work to a node\'s  balance', async function() { // jshint ignore:line
       let market = await Market.deployed()
       let nFactory = await NodeFactory.deployed()
       await nFactory.createNode.sendTransaction("node_data", {from:user})
@@ -70,16 +70,14 @@ contract('Market', function(accounts) {
       let userOwnedPools = await market.getOwnedPools(user)
       let userOwnedPool = Pool.at(userOwnedPools[0])
 
-      await node.applyToPool.sendTransaction(userOwnedPools[0], 'name', {from: user})
-      //
-      // console.log(node.address);
+      await node.applyToPool.sendTransaction(userOwnedPools[0], 'name', {from: user}) // jshint ignore:line
 
       let startingPoolBalance = await userOwnedPool.balance.call()
       let startingUserBalance = await userOwnedPool.getBalanceStructFor(user)
       let startingNodeBalance = await userOwnedPool.getBalanceStructFor(node.address)
       let startingMarketBalance = await market.balance.call()
 
-      await market.logWorkFrom(userOwnedPools[0], node.address, user, amount)
+      await market.logWorkFrom(userOwnedPools[0], node.address, user, amount) // jshint ignore:line
 
       let poolBalance = await userOwnedPool.balance.call()
       let userBalance = await userOwnedPool.getBalanceStructFor(user)
@@ -102,9 +100,9 @@ contract('Market', function(accounts) {
       assert.equal(userBalance[0].toNumber(), startingUserBalance[0].toNumber(), 'Client: Amount owed  changed unexpectedly')
       assert.equal(userBalance[1].toNumber(), startingUserBalance[1].toNumber() - amount, 'Client: Total amount did not decrease by ' + amount)
       assert.equal(userBalance[2].toNumber(), amount, 'Client: Amount completed (expected:' + amount + ') does not equal ' + amount + ' completed')
-    })
+    }) // jshint ignore:line
 
-    it('Pay out a node from owed balance', async function() {
+    it('Pay out a node from owed balance', async function() { // jshint ignore:line
       let market = await Market.deployed()
 
       let amount = 1
@@ -119,7 +117,7 @@ contract('Market', function(accounts) {
       let startingNodeBalance = await userOwnedPool.getBalanceStructFor(node)
       let startingMarketBalance = await market.balance.call()
 
-      await market.payout(userOwnedPools[0], node, amount)
+      await market.payout(userOwnedPools[0], node, amount) // jshint ignore:line
 
       let poolBalance = await userOwnedPool.balance.call()
       let userBalance = await userOwnedPool.getBalanceStructFor(user)
@@ -147,7 +145,7 @@ contract('Market', function(accounts) {
       assert.equal(userBalance[1].toNumber(), startingUserBalance[1].toNumber(), 'Node: Total amount changed unexpectedly')
       assert.equal(userBalance[2].toNumber(), startingUserBalance[2].toNumber(), 'Node: Completed amount changed unexpectedly')
       assert.equal(userBalance[3].toNumber(), startingUserBalance[3].toNumber(), 'Node: Paid amount changed unexpectedly')
-    })
+    }) // jshint ignore:line
   })
 })
 

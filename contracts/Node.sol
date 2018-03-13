@@ -23,7 +23,11 @@ contract Node {
     return status[_pool];
   }
 
-  function getData(address _pool) public view returns(string) {
+  function getData() public view returns(string) {
+    return data;
+  }
+
+  function getPoolData(address _pool) public view returns(string) {
     return poolData[_pool];
   }
 
@@ -68,5 +72,4 @@ contract Node {
 
     p.addNode();
   }
-
 }
