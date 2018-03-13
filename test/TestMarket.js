@@ -71,8 +71,6 @@ contract('Market', function(accounts) {
       let userOwnedPool = Pool.at(userOwnedPools[0])
 
       await node.applyToPool.sendTransaction(userOwnedPools[0], 'name', {from: user}) // jshint ignore:line
-      //
-      // console.log(node.address);
 
       let startingPoolBalance = await userOwnedPool.balance.call()
       let startingUserBalance = await userOwnedPool.getBalanceStructFor(user)
