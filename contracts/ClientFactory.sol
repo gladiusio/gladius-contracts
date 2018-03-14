@@ -22,11 +22,11 @@ contract ClientFactory {
      return address(client);
    }
 
-   function getClientAddress() public returns(address) {
+   function getClientAddress() public view returns(address) {
      return ownerToClient[msg.sender];
    }
 
-   function getClientCount() public returns(uint256){
+   function getClientCount() public view returns(uint256){
      return totalClients;
    }
 }

@@ -61,7 +61,7 @@ contract('Market', function(accounts) {
     it('Add work to a node\'s  balance', async function() { // jshint ignore:line
       let market = await Market.deployed()
       let nFactory = await NodeFactory.deployed()
-      await nFactory.createNode.sendTransaction("node_data", {from:user})
+      await nFactory.createNode.sendTransaction({from:user})
       let _node = await nFactory.getNodeAddress.call({from:user})
       let node = await Node.at(_node);
 

@@ -214,7 +214,7 @@ contract Market is AbstractBalance {
     return pool.allocateFundsFrom(_client, _amount);
   }
 
-  function getAllPools() public returns (address[]) {
+  function getAllPools() public view returns (address[]) {
       return allPoolsList;
     }
 }

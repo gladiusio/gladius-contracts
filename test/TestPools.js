@@ -32,7 +32,7 @@ contract('Pool', async function(accounts) {
     })
 
     it('Node and client added to list', async function() {
-      await nFactory.createNode.sendTransaction("node1_data", {from:nodeAddress1})
+      await nFactory.createNode.sendTransaction({from:nodeAddress1})
       let _node = await nFactory.getNodeAddress.call({from:nodeAddress1})
       let node = await Node.at(_node);
 
@@ -62,11 +62,12 @@ contract('Pool', async function(accounts) {
       let plist = await market.getAllPools.call()
       let pool = Pool.at(plist[0])
 
-      await nFactory.createNode.sendTransaction("node2_data", {from:nodeAddress2})
+      await nFactory.createNode.sendTransaction({from:nodeAddress2})
       let _node = await nFactory.getNodeAddress.call({from:nodeAddress2})
       let node = await Node.at(_node);
+      // await node.setData.sendTransaction("celo-node2", {from:nodeAddress2})
 
-      await cFactory.createClient.sendTransaction("client2_data", {from:clientAddress2})
+      await cFactory.createClient.sendTransaction({from:clientAddress2})
       let _client = await cFactory.getClientAddress.call({from:clientAddress2})
       let client = await Client.at(_client);
 
@@ -75,6 +76,8 @@ contract('Pool', async function(accounts) {
 
       let nodeData = await node.getPoolData.call(plist[0])
       let clientData = await client.getPoolData.call(plist[0])
+
+      console.log(nodeData)
 
       let count = await nFactory.getNodeCount.call();
 
@@ -138,6 +141,5 @@ contract('Pool', async function(accounts) {
       assert.equal(nodeStatus.toNumber(), 0, 'Nodes being added to count')
       assert.equal(clientStatus.toNumber(), 0, 'Clients being added to count')
     })
-
   })
 })
