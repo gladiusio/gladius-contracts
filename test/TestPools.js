@@ -32,11 +32,11 @@ contract('Pool', async function(accounts) {
     })
 
     it('Node and client added to list', async function() {
-      await nFactory.createNode.sendTransaction({from:nodeAddress1})
+      await nFactory.createNode({from:nodeAddress1})
       let _node = await nFactory.getNodeAddress.call({from:nodeAddress1})
       let node = await Node.at(_node);
 
-      await cFactory.createClient.sendTransaction("client1_data", {from:clientAddress1})
+      await cFactory.createClient({from:clientAddress1})
       let _client = await cFactory.getClientAddress.call({from:clientAddress1})
       let client = await Client.at(_client);
 
@@ -62,17 +62,18 @@ contract('Pool', async function(accounts) {
       let plist = await market.getAllPools.call()
       let pool = Pool.at(plist[0])
 
-      await nFactory.createNode.sendTransaction({from:nodeAddress2})
+      await nFactory.createNode({from:nodeAddress2})
       let _node = await nFactory.getNodeAddress.call({from:nodeAddress2})
       let node = await Node.at(_node);
-      // await node.setData.sendTransaction("celo-node2", {from:nodeAddress2})
+      await node.setData.sendTransaction("celo-node2", {from:nodeAddress2})
 
-      await cFactory.createClient.sendTransaction({from:clientAddress2})
+      await cFactory.createClient({from:clientAddress2})
       let _client = await cFactory.getClientAddress.call({from:clientAddress2})
       let client = await Client.at(_client);
+      await client.setData.sendTransaction("celo-client2", {from:clientAddress2})
 
-      await node.applyToPool.sendTransaction(plist[0], "celo-node2", {from: nodeAddress2})
-      await client.applyToPool.sendTransaction(plist[0], "celo-client2", {from: clientAddress2})
+      await node.applyToPool(plist[0], "celo-node2", {from: nodeAddress2})
+      await client.applyToPool(plist[0], "celo-client2", {from: clientAddress2})
 
       let nodeData = await node.getPoolData.call(plist[0])
       let clientData = await client.getPoolData.call(plist[0])

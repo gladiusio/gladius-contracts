@@ -9,8 +9,7 @@ contract Client {
   mapping (address=>string) poolData;
   address [] poolList; //encrypted data with the POOL'S public key
 
-  function Client(string _data, address _owner) public {
-    data = _data;
+  function Client(address _owner) public {
     owner = _owner;
   }
 
@@ -36,7 +35,7 @@ contract Client {
    *
    * @param _data new data
    */
-  function changeData(string _data) public {
+  function setData(string _data) public {
     require(msg.sender == owner);
     data = _data;
   }
