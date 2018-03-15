@@ -1,18 +1,28 @@
 let Pool = artifacts.require('Pool')
 let Market = artifacts.require('Market')
 let GladiusToken = artifacts.require('GladiusToken')
+let NodeFactory = artifacts.require('NodeFactory')
+let ClientFactory = artifacts.require('ClientFactory')
+let Node = artifacts.require('Node')
+let Client = artifacts.require('Client')
 
-contract('Pool', function(accounts) {
+contract('Pool', async function(accounts) {
   // Accounts
   let owner = accounts[0]
-  let node = accounts[1]
-  let client = accounts[2]
+  let nodeAddress1 = accounts[1]
+  let nodeAddress2 = accounts[2]
+  let nodeAddress3 = accounts[3]
+  let clientAddress1 = accounts[5]
+  let clientAddress2 = accounts[6]
 
-  // Test creation of marketplace
+  let market = await Market.deployed()
+  let nFactory = await NodeFactory.deployed()
+  let cFactory = await ClientFactory.deployed()
+
+
   describe('Test Pool Contract', function() {
-    it('Check owner', async function() {
-      let market = await Market.deployed()
 
+    it('Check owner', async function() {
       await market.createPool("TEST_KEY1", {from: owner})
 
       let plist = await market.getAllPools.call();
@@ -21,9 +31,14 @@ contract('Pool', function(accounts) {
       assert.equal(poolOwner, owner, 'Pool\'s owner is not the creator of the market')
     })
 
-    // Nodes apply and added to the list
     it('Node and client added to list', async function() {
-      let market = await Market.deployed()
+      await nFactory.createNode({from:nodeAddress1})
+      let _node = await nFactory.getNodeAddress.call({from:nodeAddress1})
+      let node = await Node.at(_node);
+
+      await cFactory.createClient({from:clientAddress1})
+      let _client = await cFactory.getClientAddress.call({from:clientAddress1})
+      let client = await Client.at(_client);
 
       await market.createPool("TEST_KEY2", {from: owner})
       await market.createPool("TEST_KEY3", {from: owner})
@@ -31,76 +46,101 @@ contract('Pool', function(accounts) {
       let plist = await market.getAllPools.call()
       let pool = Pool.at(plist[0])
 
-      await pool.applyNode("public_key", "celo-node1", {from: node})
-      await pool.applyClient("public_key", "celo-client1", {from: client})
+      await node.applyToPool.sendTransaction(plist[0], "celo-node1", {from: nodeAddress1})
+      await client.applyToPool.sendTransaction(plist[0], "celo-client1", {from: clientAddress1})
+
+      let data = await node.getPoolData.call(plist[0])
 
       let nodeList = await pool.getNodeList.call()
       let clientList = await pool.getClientList.call()
 
-      assert.equal(nodeList[0], node, 'Node applicant is added to list')
-      assert.equal(clientList[0], client, 'Client applicant is added to list')
+      assert.equal(nodeList[0], node.address, 'Node applicant is added to list')
+      assert.equal(clientList[0], client.address, 'Client applicant is added to list')
     })
 
-    // Get node and client information (right now just name)
     it('Get node and client information', async function() {
-      let market = await Market.deployed()
       let plist = await market.getAllPools.call()
       let pool = Pool.at(plist[0])
 
-      let clientList = await pool.getClientList.call()
-      let nodeList   = await pool.getNodeList.call()
+      await nFactory.createNode({from:nodeAddress2})
+      let _node = await nFactory.getNodeAddress.call({from:nodeAddress2})
+      let node = await Node.at(_node);
+      await node.setData.sendTransaction("celo-node2", {from:nodeAddress2})
 
-      let clientData = await pool.getClientData.call(clientList[0])
-      let nodeData = await pool.getNodeData.call(nodeList[0])
+      await cFactory.createClient({from:clientAddress2})
+      let _client = await cFactory.getClientAddress.call({from:clientAddress2})
+      let client = await Client.at(_client);
+      await client.setData.sendTransaction("celo-client2", {from:clientAddress2})
 
-      assert.equal(clientData, "celo-client1", 'Able to get client data')
-      assert.equal(nodeData, "celo-node1", 'Able to get node data')
+      await node.applyToPool(plist[0], "celo-node2", {from: nodeAddress2})
+      await client.applyToPool(plist[0], "celo-client2", {from: clientAddress2})
+
+      let nodeData = await node.getPoolData.call(plist[0])
+      let clientData = await client.getPoolData.call(plist[0])
+
+      console.log(nodeData)
+
+      let count = await nFactory.getNodeCount.call();
+
+      assert.equal(nodeData, "celo-node2", 'Able to get node data')
+      assert.equal(clientData, "celo-client2", 'Able to get client data')
     })
 
-    // Get node and client lists
     it('Get node and client lists', async function() {
-      let market = await Market.deployed()
       let plist = await market.getAllPools.call()
       let pool = Pool.at(plist[0])
 
-      await pool.applyClient("public_key", "celo-client2", {from: client})
-      await pool.applyClient("public_key", "celo-client3", {from: client})
-      await pool.applyNode("public_key", "celo-node2", {from: node})
-      await pool.applyNode("public_key", "celo-node3", {from: node})
+      //2 clients and 2 nodes applied for pool in the previous tests
 
-      let clientList = await pool.getClientList.call()
       let nodeList   = await pool.getNodeList.call()
+      let clientList = await pool.getClientList.call()
 
-      assert.equal(clientList.length, 3, 'Clients being added to count')
-      assert.equal(nodeList.length, 3, 'Nodes being added to count')
+      assert.equal(nodeList.length, 2, 'Nodes being added to list')
+      assert.equal(clientList.length, 2, 'Clients being added to list')
     })
 
-    //WIP
+    it('Accept node and clients', async function() {
+      let plist = await market.getAllPools.call()
+      let pool = Pool.at(plist[0])
+      let nodeList   = await pool.getNodeList.call()
+      let clientList = await pool.getClientList.call()
 
-    // it('Update node and client data', async function() {
-    //   let market = await Market.deployed()
-    //   let plist = await market.getAllPools.call()
-    //   let pool = Pool.at(plist[0])
-    //
-    //   let clientList = await pool.getClientList.call()
-    //   let nodeList   = await pool.getNodeList.call()
-    //
-    //   console.log("==================");
-    //   console.log(clientList[0]);
-    //   console.log("==================");
-    //
-    //   await pool.updateClientData.sendTransaction(clientList[0], "nate-client1", {from:client})
-    //   await pool.updateNodeData.sendTransaction(nodeList[0], "nate-node1", {from:node})
-    //
-    //    let resultClient = await pool.getClient.call(clientList[0])
-    //    console.log("==================");
-    //    console.log(resultClient);
-    //    console.log("==================");
-    //   // let resultNode = await pool.getNode.call(nodeList[0])
-    //
-    //   assert.equal(resultClient, "nate-client1", 'Clients being added to count')
-    //   assert.equal(resultNode, "nate-node1", 'Nodes being added to count')
-    // })
+      pool.acceptNode.sendTransaction(nodeList[0], {from:owner})
+      pool.acceptClient.sendTransaction(clientList[0], {from:owner})
 
+      let _node = await nFactory.getNodeAddress.call({from:nodeAddress1})
+      let node = await Node.at(_node)
+
+      let _client = await cFactory.getClientAddress.call({from:clientAddress1})
+      let client = await Client.at(_client);
+
+      let nodeStatus = await node.getStatus.call(plist[0], {from:nodeAddress1})
+      let clientStatus = await client.getStatus.call(plist[0], {from:clientAddress1})
+
+      assert.equal(nodeStatus.toNumber(), 1, 'Nodes being added to count')
+      assert.equal(clientStatus.toNumber(), 1, 'Clients being added to count')
+    })
+
+    it('Reject node and clients', async function() {
+      let plist = await market.getAllPools.call()
+      let pool = Pool.at(plist[0])
+      let nodeList   = await pool.getNodeList.call()
+      let clientList = await pool.getClientList.call()
+
+      pool.rejectNode.sendTransaction(nodeList[1], {from:owner})
+      pool.rejectClient.sendTransaction(clientList[1], {from:owner})
+
+      let _node = await nFactory.getNodeAddress.call({from:nodeAddress2})
+      let node = await Node.at(_node)
+
+      let _client = await cFactory.getClientAddress.call({from:clientAddress2})
+      let client = await Client.at(_client);
+
+      let nodeStatus = await node.getStatus.call(plist[0], {from:nodeAddress2})
+      let clientStatus = await client.getStatus.call(plist[0], {from:clientAddress2})
+
+      assert.equal(nodeStatus.toNumber(), 0, 'Nodes being added to count')
+      assert.equal(clientStatus.toNumber(), 0, 'Clients being added to count')
+    })
   })
 })

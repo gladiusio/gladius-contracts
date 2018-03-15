@@ -19,8 +19,8 @@ contract Market is AbstractBalance {
   mapping(address => uint32) tokensPaid;                // Account balance of the clients
   mapping(address => Payout[]) public payouts;
 
-  address[] public allPoolsList;                       // Array of all pools
-  address[] public marketPoolsList;                    // Array of all pools on the marketplace
+  address[] public allPoolsList;                        // Array of all pools
+  address[] public marketPoolsList;                     // Array of all pools on the marketplace
 
   address public owner;                                 // Owner of the market
   uint256 maxPayout;                                    // Max amount a pool can withdraw daily
@@ -214,7 +214,11 @@ contract Market is AbstractBalance {
     return pool.allocateFundsFrom(_client, _amount);
   }
 
-  function getAllPools() public returns (address[]) {
-      return allPoolsList;
-    }
+  function getAllPools() public view returns (address[]) {
+    return allPoolsList;
+  }
+
+  function getMarketPools() public view returns (address[]) {
+    return marketPoolsList;
+  }
 }
