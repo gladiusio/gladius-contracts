@@ -215,6 +215,10 @@ contract Market is AbstractBalance {
   }
 
   function getAllPools() public view returns (address[]) {
-      return allPoolsList;
-    }
+    return allPoolsList;
+  }
+
+  function getMarketPools() public view returns (address[]) {
+    return marketPoolsList;
+  }
 }
