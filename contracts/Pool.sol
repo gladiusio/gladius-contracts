@@ -8,9 +8,9 @@ import "./AbstractBalance.sol";
 contract Pool is AbstractBalance {
   string public publicKey;                           //a public RSA key to encrypt against
   string public data;
+  string public publicData;
 
   address private owner;                             //msg.sender = marketplace; therefore we need to pass in an owner manually
-  bytes32[] nameServers;
 
   mapping (address => Client) private clients;       //client requesting pool for protection/cdn
   mapping (address => Node) private nodes;         //node information (proposal)
@@ -34,6 +34,10 @@ contract Pool is AbstractBalance {
 
   function setData(string _data) external {
     data = _data;
+  }
+
+  function setPublicData(string _data) external {
+    publicData = _data;
   }
 
   /**

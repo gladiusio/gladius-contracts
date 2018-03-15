@@ -4,6 +4,7 @@ import "./Pool.sol";
 
 contract Node {
   string public data; //encrypted data with the NODE'S public key
+  string public publicData;
   address owner;
   mapping (address=>int) status; // 0 = rejected, 1 = approved, 2 = pending
   mapping (address=>string) poolData; //encrypted data with the POOL'S public key
@@ -17,6 +18,10 @@ contract Node {
   function setData(string _data) external {
     require(msg.sender == owner);
     data = _data;
+  }
+
+  function setPublicData(string _data) external {
+    publicData = _data;
   }
 
   function setStatus(int _status) external {
