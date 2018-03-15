@@ -17,8 +17,8 @@ contract('Node', function(accounts) {
     it('Create a node', async function() {
       let market = await Market.deployed()
       let nFactory = await NodeFactory.deployed()
-      
-      await nFactory.createNode.sendTransaction("node1_data", {from:nodeAddress})
+
+      await nFactory.createNode.sendTransaction({from:nodeAddress})
 
       let _nAddress = await nFactory.getNodeAddress.call({from:nodeAddress});
 
