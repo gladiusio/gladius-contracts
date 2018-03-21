@@ -59,6 +59,7 @@ contract Node {
    */
   function applyToPool(address _pool, string _data) public {
     require(msg.sender == owner);
+    require(status[_pool] == 0);
 
     Pool p = Pool(_pool);
 
