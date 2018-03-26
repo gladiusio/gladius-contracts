@@ -5,14 +5,17 @@ import "./Pool.sol";
 contract Node {
   string public data; //encrypted data with the NODE'S public key
   string public publicData;
+
   address owner;
+  address [] poolList;
+
   mapping (address=>int) status; // 0 = rejected, 1 = approved, 2 = pending
   mapping (address=>string) poolData; //encrypted data with the POOL'S public key
-  address [] poolList;
 
   function Node(address _owner) public {
     owner = _owner;
     data = '';
+    publicData = '';
   }
 
   function setData(string _data) external {
@@ -20,8 +23,8 @@ contract Node {
     data = _data;
   }
 
-  function setPublicData(string _data) external {
-    publicData = _data;
+  function setPublicData(string _publicData) external {
+    publicData = _publicData;
   }
 
   function setStatus(int _status) external {

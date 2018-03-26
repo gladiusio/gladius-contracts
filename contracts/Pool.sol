@@ -11,13 +11,11 @@ contract Pool is AbstractBalance {
   string public publicData;
 
   address private owner;                             //msg.sender = marketplace; therefore we need to pass in an owner manually
-
-  mapping (address => Client) private clients;       //client requesting pool for protection/cdn
-  mapping (address => Node) private nodes;         //node information (proposal)
-
   address[] private client_list;                     //list of client proposals
   address[] private node_list;                       //list of node proposals
 
+  mapping (address => Client) private clients;       //client requesting pool for protection/cdn
+  mapping (address => Node) private nodes;           //node information (proposal)
   mapping (address => Balance) userBalance;          //maps a client's address to a balance struct
 
   /**
@@ -30,14 +28,18 @@ contract Pool is AbstractBalance {
   function Pool(string _publicKey, address _owner) public {
     publicKey = _publicKey;
     owner = _owner;
+    data = '';
+    publicData = '';
   }
 
   function setData(string _data) external {
+    require(msg.sender == owner);
     data = _data;
   }
 
-  function setPublicData(string _data) external {
-    publicData = _data;
+  function setPublicData(string _publicData) external {
+    require(msg.sender == owner);
+    publicData = _publicData;
   }
 
   /**
