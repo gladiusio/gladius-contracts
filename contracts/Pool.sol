@@ -167,7 +167,7 @@ contract Pool is AbstractBalance {
    */
   function addNode() external {
     Node _newNode = Node(msg.sender);
-    require(_newNode.getStatus(address(this)) == 2); //make sure the node has applied to this pool
+    require(_newNode.getStatus(address(this)) == 3); //make sure the node has applied to this pool
 
     node_list.push(msg.sender);
     nodes[msg.sender] = _newNode;
@@ -180,7 +180,7 @@ contract Pool is AbstractBalance {
    */
   function addClient() external {
     Client _newClient = Client(msg.sender);
-    require(_newClient.getStatus(address(this)) == 2); //make sure the client has applied to this pool
+    require(_newClient.getStatus(address(this)) == 3); //make sure the client has applied to this pool
 
     client_list.push(msg.sender);
     clients[msg.sender] = _newClient;
@@ -194,7 +194,7 @@ contract Pool is AbstractBalance {
   function acceptNode(address _node) public {
     require(msg.sender == owner);
     Node _applicant = Node(_node);
-    require(_applicant.getStatus(address(this)) == 2);
+    require(_applicant.getStatus(address(this)) == 3);
     _applicant.setStatus(1);
   }
 
@@ -206,7 +206,7 @@ contract Pool is AbstractBalance {
   function acceptClient(address _client) public {
     require(msg.sender == owner);
     Client _applicant = Client(_client);
-    require(_applicant.getStatus(address(this)) == 2);
+    require(_applicant.getStatus(address(this)) == 3);
     _applicant.setStatus(1);
   }
 
@@ -218,8 +218,8 @@ contract Pool is AbstractBalance {
   function rejectNode(address _node) public {
     require(msg.sender == owner);
     Node _applicant = Node(_node);
-    require(_applicant.getStatus(address(this)) == 2);
-    _applicant.setStatus(0);
+    require(_applicant.getStatus(address(this)) == 3);
+    _applicant.setStatus(2);
   }
 
   /**
@@ -230,7 +230,7 @@ contract Pool is AbstractBalance {
   function rejectClient(address _client) public {
     require(msg.sender == owner);
     Client _applicant = Client(_client);
-    require(_applicant.getStatus(address(this)) == 2);
-    _applicant.setStatus(0);
+    require(_applicant.getStatus(address(this)) == 3);
+    _applicant.setStatus(2);
   }
 }

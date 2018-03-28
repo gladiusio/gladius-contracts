@@ -9,7 +9,7 @@ contract Node {
   address owner;
   address [] poolList;
 
-  mapping (address=>int) status; // 0 = rejected, 1 = approved, 2 = pending
+  mapping (address=>int) status; // 0 = not available, 1 = approved, 2 = rejected, 3 = pending
   mapping (address=>string) poolData; //encrypted data with the POOL'S public key
 
   function Node(address _owner) public {
@@ -66,7 +66,7 @@ contract Node {
 
     Pool p = Pool(_pool);
 
-    status[_pool] = 2;
+    status[_pool] = 3;
     poolData[_pool] = _data;
     poolList.push(_pool);
 
