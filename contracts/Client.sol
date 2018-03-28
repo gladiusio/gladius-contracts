@@ -5,7 +5,7 @@ import "./Pool.sol";
 contract Client {
   string data; //encrypted data with the CLIENT'S public key
   address owner;
-  mapping (address=>int) status; // 0 = rejected, 1 = approved, 2 = pending
+  mapping (address=>int) status; // 0 = not available, 1 = approved, 2 = rejected, 3 = pending
   mapping (address=>string) poolData;
   address [] poolList; //encrypted data with the POOL'S public key
 
@@ -58,14 +58,14 @@ contract Client {
    */
   function applyToPool(address _pool, string _data) public {
     require(msg.sender == owner);
+    require(status[_pool] == 0);
 
     Pool p = Pool(_pool);
 
-    status[_pool] = 2;
+    status[_pool] = 3;
     poolData[_pool] = _data;
     poolList.push(_pool);
 
     p.addClient();
   }
-
 }

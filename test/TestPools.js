@@ -139,8 +139,8 @@ contract('Pool', async function(accounts) {
       let nodeStatus = await node.getStatus.call(plist[0], {from:nodeAddress2})
       let clientStatus = await client.getStatus.call(plist[0], {from:clientAddress2})
 
-      assert.equal(nodeStatus.toNumber(), 0, 'Nodes being added to count')
-      assert.equal(clientStatus.toNumber(), 0, 'Clients being added to count')
+      assert.equal(nodeStatus.toNumber(), 2, 'Nodes being added to count')
+      assert.equal(clientStatus.toNumber(), 2, 'Clients being added to count')
     })
   })
 })
