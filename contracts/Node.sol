@@ -44,6 +44,10 @@ contract Node {
     return poolList;
   }
 
+  function getOwner() public view returns(address) {
+    return owner;
+  }
+
   /**
    * change data provided to pool
    *

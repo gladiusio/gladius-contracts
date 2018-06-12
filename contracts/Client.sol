@@ -30,6 +30,10 @@ contract Client {
     return poolData[_pool];
   }
 
+  function getOwner() public view returns(address) {
+    return owner;
+  }
+
   /**
    * change client's core data
    *

@@ -142,5 +142,25 @@ contract('Pool', async function(accounts) {
       assert.equal(nodeStatus.toNumber(), 2, 'Nodes being added to count')
       assert.equal(clientStatus.toNumber(), 2, 'Clients being added to count')
     })
+
+    it('Records all Node owners', async function() {
+      let plist = await market.getAllPools.call()
+      let pool = Pool.at(plist[0])
+      let nodeList = await pool.getNodeList.call()
+      let nodeOwnersList = await pool.getNodeOwnerList.call()
+      assert.equal(nodeList.length, nodeOwnersList.length, 'Nodes being added to owners list')
+      assert.equal(nodeOwnersList[0], accounts[1], 'Nodes being added to owners list')
+      assert.equal(nodeOwnersList[1], accounts[2], 'Nodes being added to owners list')
+    })
+
+    it('Records all Client owners', async function() {
+      let plist = await market.getAllPools.call()
+      let pool = Pool.at(plist[0])
+      let clientList = await pool.getClientList.call()
+      let clientOwnersList = await pool.getClientOwnerList.call()
+      assert.equal(clientList.length, clientOwnersList.length, 'Clients being added to owners list')
+      assert.equal(clientOwnersList[0], accounts[5], 'Clients being added to owners list')
+      assert.equal(clientOwnersList[1], accounts[6], 'Clients being added to owners list')
+    })
   })
 })
