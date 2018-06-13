@@ -49,8 +49,6 @@ contract('Pool', async function(accounts) {
       await node.applyToPool.sendTransaction(plist[0], "celo-node1", {from: nodeAddress1})
       await client.applyToPool.sendTransaction(plist[0], "celo-client1", {from: clientAddress1})
 
-      let data = await node.getPoolData.call(plist[0])
-
       let nodeList = await pool.getNodeList.call()
       let clientList = await pool.getClientList.call()
 
@@ -58,45 +56,17 @@ contract('Pool', async function(accounts) {
       assert.equal(clientList[0], client.address, 'Client applicant is added to list')
     })
 
-    it('Get node and client information', async function() {
-      let plist = await market.getAllPools.call()
-      let pool = Pool.at(plist[0])
-
-      await nFactory.createNode({from:nodeAddress2})
-      let _node = await nFactory.getNodeAddress.call({from:nodeAddress2})
-      let node = await Node.at(_node);
-      await node.setData.sendTransaction("celo-node2", {from:nodeAddress2})
-
-      await cFactory.createClient({from:clientAddress2})
-      let _client = await cFactory.getClientAddress.call({from:clientAddress2})
-      let client = await Client.at(_client);
-      await client.setData.sendTransaction("celo-client2", {from:clientAddress2})
-
-      await node.applyToPool(plist[0], "celo-node2", {from: nodeAddress2})
-      await client.applyToPool(plist[0], "celo-client2", {from: clientAddress2})
-
-      let nodeData = await node.getPoolData.call(plist[0])
-      let clientData = await client.getPoolData.call(plist[0])
-
-      console.log(nodeData)
-
-      let count = await nFactory.getNodeCount.call();
-
-      assert.equal(nodeData, "celo-node2", 'Able to get node data')
-      assert.equal(clientData, "celo-client2", 'Able to get client data')
-    })
-
     it('Get node and client lists', async function() {
       let plist = await market.getAllPools.call()
       let pool = Pool.at(plist[0])
 
-      //2 clients and 2 nodes applied for pool in the previous tests
+      // 1 client and 1 node applied for pool in the previous tests
 
       let nodeList   = await pool.getNodeList.call()
       let clientList = await pool.getClientList.call()
 
-      assert.equal(nodeList.length, 2, 'Nodes being added to list')
-      assert.equal(clientList.length, 2, 'Clients being added to list')
+      assert.equal(nodeList.length, 1, 'Nodes being added to list')
+      assert.equal(clientList.length, 1, 'Clients being added to list')
     })
 
     it('Accept node and clients', async function() {
