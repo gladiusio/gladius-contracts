@@ -25,9 +25,9 @@ contract('Market', function(accounts) {
 
       let initialMarketPools = await market.getOwnedPools(user)
 
-      market.createPool('FAKE_KEY', {from: user})
-      market.createPool('FAKE_KEY', {from: owner})
-      market.createPool('FAKE_KEY', {from: user})
+      await market.createPool('FAKE_KEY', {from: user})
+      await market.createPool('FAKE_KEY', {from: owner})
+      await market.createPool('FAKE_KEY', {from: user})
 
       let endingMarketPools = await market.getOwnedPools(user)
 

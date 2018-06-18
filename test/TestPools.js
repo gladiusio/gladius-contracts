@@ -33,12 +33,20 @@ contract('Pool', async function(accounts) {
 
     it('Node and client added to list', async function() {
       await nFactory.createNode({from:nodeAddress1})
-      let _node = await nFactory.getNodeAddress.call({from:nodeAddress1})
-      let node = await Node.at(_node);
+      let _node1 = await nFactory.getNodeAddress.call({from:nodeAddress1})
+      let node1 = await Node.at(_node1);
+
+      await nFactory.createNode({from:nodeAddress2})
+      let _node2 = await nFactory.getNodeAddress.call({from:nodeAddress2})
+      let node2 = await Node.at(_node2);
 
       await cFactory.createClient({from:clientAddress1})
-      let _client = await cFactory.getClientAddress.call({from:clientAddress1})
-      let client = await Client.at(_client);
+      let _client1 = await cFactory.getClientAddress.call({from:clientAddress1})
+      let client1 = await Client.at(_client1);
+
+      await cFactory.createClient({from:clientAddress2})
+      let _client2 = await cFactory.getClientAddress.call({from:clientAddress2})
+      let client2 = await Client.at(_client2);
 
       await market.createPool("TEST_KEY2", {from: owner})
       await market.createPool("TEST_KEY3", {from: owner})
@@ -46,14 +54,16 @@ contract('Pool', async function(accounts) {
       let plist = await market.getAllPools.call()
       let pool = Pool.at(plist[0])
 
-      await node.applyToPool.sendTransaction(plist[0], "celo-node1", {from: nodeAddress1})
-      await client.applyToPool.sendTransaction(plist[0], "celo-client1", {from: clientAddress1})
+      await node1.applyToPool.sendTransaction(plist[0], "celo-node1", {from: nodeAddress1})
+      await node2.applyToPool.sendTransaction(plist[0], "celo-node2", {from: nodeAddress2})
+      await client1.applyToPool.sendTransaction(plist[0], "celo-client1", {from: clientAddress1})
+      await client2.applyToPool.sendTransaction(plist[0], "celo-client2", {from: clientAddress2})
 
       let nodeList = await pool.getNodeList.call()
       let clientList = await pool.getClientList.call()
 
-      assert.equal(nodeList[0], node.address, 'Node applicant is added to list')
-      assert.equal(clientList[0], client.address, 'Client applicant is added to list')
+      assert.equal(nodeList[0], node1.address, 'Node applicant is added to list')
+      assert.equal(clientList[1], client2.address, 'Client applicant is added to list')
     })
 
     it('Get node and client lists', async function() {
@@ -65,8 +75,8 @@ contract('Pool', async function(accounts) {
       let nodeList   = await pool.getNodeList.call()
       let clientList = await pool.getClientList.call()
 
-      assert.equal(nodeList.length, 1, 'Nodes being added to list')
-      assert.equal(clientList.length, 1, 'Clients being added to list')
+      assert.equal(nodeList.length, 2, 'Nodes being added to list')
+      assert.equal(clientList.length, 2, 'Clients being added to list')
     })
 
     it('Accept node and clients', async function() {
@@ -75,8 +85,8 @@ contract('Pool', async function(accounts) {
       let nodeList   = await pool.getNodeList.call()
       let clientList = await pool.getClientList.call()
 
-      pool.acceptNode.sendTransaction(nodeList[0], {from:owner})
-      pool.acceptClient.sendTransaction(clientList[0], {from:owner})
+      await pool.acceptNode.sendTransaction(nodeList[0], {from:owner})
+      await pool.acceptClient.sendTransaction(clientList[0], {from:owner})
 
       let _node = await nFactory.getNodeAddress.call({from:nodeAddress1})
       let node = await Node.at(_node)
@@ -97,8 +107,8 @@ contract('Pool', async function(accounts) {
       let nodeList   = await pool.getNodeList.call()
       let clientList = await pool.getClientList.call()
 
-      pool.rejectNode.sendTransaction(nodeList[1], {from:owner})
-      pool.rejectClient.sendTransaction(clientList[1], {from:owner})
+      await pool.rejectNode.sendTransaction(nodeList[1], {from:owner})
+      await pool.rejectClient.sendTransaction(clientList[1], {from:owner})
 
       let _node = await nFactory.getNodeAddress.call({from:nodeAddress2})
       let node = await Node.at(_node)
