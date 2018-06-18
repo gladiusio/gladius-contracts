@@ -3,11 +3,10 @@ pragma solidity ^0.4.19;
 import "./Pool.sol";
 
 contract Client {
-  string data; //encrypted data with the CLIENT'S public key
   address owner;
+  address [] poolList;
   mapping (address=>int) status; // 0 = not available, 1 = approved, 2 = rejected, 3 = pending
-  mapping (address=>string) poolData;
-  address [] poolList; //encrypted data with the POOL'S public key
+  /* address [] poolList; //encrypted data with the POOL'S public key */
 
   function Client(address _owner) public {
     owner = _owner;
@@ -22,36 +21,8 @@ contract Client {
     return status[_pool];
   }
 
-  function getData() public view returns(string){
-    return data;
-  }
-
-  function getPoolData(address _pool) public view returns(string){
-    return poolData[_pool];
-  }
-
   function getOwner() public view returns(address) {
     return owner;
-  }
-
-  /**
-   * change client's core data
-   *
-   * @param _data new data
-   */
-  function setData(string _data) public {
-    require(msg.sender == owner);
-    data = _data;
-  }
-
-  /**
-   * change data provided to pool
-   *
-   * @param _data new data
-   */
-  function changePoolData(address _pool, string _data) public {
-    require(msg.sender == owner);
-    poolData[_pool] = _data;
   }
 
   /**
@@ -67,7 +38,6 @@ contract Client {
     Pool p = Pool(_pool);
 
     status[_pool] = 3;
-    poolData[_pool] = _data;
     poolList.push(_pool);
 
     p.addClient();

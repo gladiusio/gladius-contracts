@@ -7,8 +7,6 @@ import "./AbstractBalance.sol";
 
 contract Pool is AbstractBalance {
   string public publicKey;                           //a public RSA key to encrypt against
-  string public data;
-  string public publicData;
 
   address private owner;                             //msg.sender = marketplace; therefore we need to pass in an owner manually
   address[] public nodeOwners;
@@ -30,18 +28,6 @@ contract Pool is AbstractBalance {
   function Pool(string _publicKey, address _owner) public {
     publicKey = _publicKey;
     owner = _owner;
-    data = '';
-    publicData = '';
-  }
-
-  function setData(string _data) external {
-    require(msg.sender == owner);
-    data = _data;
-  }
-
-  function setPublicData(string _publicData) external {
-    require(msg.sender == owner);
-    publicData = _publicData;
   }
 
   /**
