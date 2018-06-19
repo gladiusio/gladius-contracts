@@ -1,5 +1,4 @@
 pragma solidity ^0.4.19;
-pragma experimental ABIEncoderV2;
 
 import "./Pool.sol";
 import "./AbstractBalance.sol";
@@ -45,7 +44,7 @@ contract Market is AbstractBalance {
    * @param _joinCost Cost to join the marketplace
    * @param _maxPayout Maxium payout to pool owners in a given day
    */
-  function Market(address _owner, address _gladiusToken, uint256 _joinCost, uint256 _maxPayout) public {
+  constructor(address _owner, address _gladiusToken, uint256 _joinCost, uint256 _maxPayout) public {
     owner = _owner;
     gladiusToken = Token(_gladiusToken);
     joinCost = _joinCost;
@@ -90,93 +89,6 @@ contract Market is AbstractBalance {
   }
 
   /**
-   * Records an amount of work done in a pool for a node by a client
-   *
-   * @param _pool Pool address to record work to
-   * @param _node Node that completed the work
-   * @param _client Client that will be billed for the nodes work
-   * @param _amount Amount of work completed
-   */
-  function logWorkFrom(address _pool, address _node, address _client, uint _amount) public {
-    Pool pool = Pool(_pool);
-
-    require(pool.logWorkFrom(_node, _client, _amount));
-    require(work(_amount));
-  }
-
-  /**
-   * Returns a list of receipts of payouts for a given user
-   *
-   * @param _user User to retrieve payouts from
-   * @return Payout[] array of payouts
-   */
-  function getPayouts(address _user) public view returns(Payout[]) {
-    return payouts[_user];
-  }
-
-  /**
-   * Determines if a node can withdraw money
-   *
-   * Checks the daily maximum and the timeframe of last payout
-   * @param _pool Pool address to record work to
-   * @param _node Node that completed the work
-   * @param _amount Amount of work completed
-   * @return bool true if node can withdraw
-   */
-  function canPayNode(address _pool, address _node, uint256 _amount) private view returns (bool) {
-    Payout[] storage poolPayouts = payouts[_node];
-
-    // Arbitrary number for now
-    uint256 dailyMaximum = 5;
-
-    if (_amount > dailyMaximum) {
-      return false;
-    }
-
-    if (poolPayouts.length == 0) {
-      return true;
-    } else {
-      uint256 recentPayouts = 0;
-      for(uint i = poolPayouts.length - 1; i>=0; i++) {
-        Payout storage payout = poolPayouts[i];
-        if (now - payout.timestamp > 86400) {
-          break;
-        } else if (_pool == payout.pool) {
-          recentPayouts += payout.amount;
-        }
-      }
-
-      if (recentPayouts < dailyMaximum && _amount < Pool(_pool).getOwedBalanceFor(_node)) {
-        return true;
-      } else {
-        return false;
-      }
-    }
-  }
-
-  /**
-   * Lets a node withdraw money owed to them if canPayNode() passes
-   *
-   * Actual payout function that transfers money
-   * @param _pool Pool address to record work to
-   * @param _node Node that completed the work
-   * @param _amount Amount of work completed
-   * @return bool true if withdraw was successful
-   */
-  function payout(address _pool, address _node, uint256 _amount) public returns (bool) {
-    if (!canPayNode(_pool, _node, _amount)) {
-      return false;
-    }
-
-    Pool(_pool).payout(_node, _amount);
-    pay(_amount);
-
-    payouts[_node].push(Payout(_pool,  _node, _amount, now));
-
-    return true;
-  }
-
-  /**
    * Adds the pool address to the marketplace, and charges the owner of the pool the join cost
    *
    * Require that the pool's owner is the sender
@@ -195,24 +107,6 @@ contract Market is AbstractBalance {
     marketPoolsList.push(p);
 
     return true;
-  }
-
-  /**
-   * Initial allocation of funds from Client to Market
-   *
-   * Moves money from a client into the MarketPlace
-   * @param _pool address
-   * @param _client address
-   * @param _amount uint
-   * @return bool TODO run through checks to ensure transfer logic passes
-   */
-  function allocateClientFundsTo(address _pool, address _client, uint _amount) public returns (bool) {
-    // TODO - Allocate pool funds first to ensure marketplace should allocate
-    allocateFunds(_amount);
-
-    Pool pool = Pool(_pool);
-    // Allocate pool balance
-    return pool.allocateFundsFrom(_client, _amount);
   }
 
   function getAllPools() public view returns (address[]) {

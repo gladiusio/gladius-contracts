@@ -54,10 +54,10 @@ contract('Pool', async function(accounts) {
       let plist = await market.getAllPools.call()
       let pool = Pool.at(plist[0])
 
-      await node1.applyToPool.sendTransaction(plist[0], "celo-node1", {from: nodeAddress1})
-      await node2.applyToPool.sendTransaction(plist[0], "celo-node2", {from: nodeAddress2})
-      await client1.applyToPool.sendTransaction(plist[0], "celo-client1", {from: clientAddress1})
-      await client2.applyToPool.sendTransaction(plist[0], "celo-client2", {from: clientAddress2})
+      await node1.applyToPool.sendTransaction(plist[0], {from: nodeAddress1})
+      await node2.applyToPool.sendTransaction(plist[0], {from: nodeAddress2})
+      await client1.applyToPool.sendTransaction(plist[0], {from: clientAddress1})
+      await client2.applyToPool.sendTransaction(plist[0], {from: clientAddress2})
 
       let nodeList = await pool.getNodeList.call()
       let clientList = await pool.getClientList.call()

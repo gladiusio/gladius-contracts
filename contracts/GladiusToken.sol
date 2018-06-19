@@ -26,7 +26,7 @@ contract GladiusToken {
      * @param _name Name of token
      * @param _symbol Symbol of token
      */
-    function GladiusToken(uint256 initialSupply, string _name, string _symbol) public {
+    constructor(uint256 initialSupply, string _name, string _symbol) public {
         totalSupply = initialSupply * 10 ** uint256(decimals);      // Update total supply with the decimal amount
         balanceOf[msg.sender] = totalSupply;                        // Give the creator all initial tokens
         name = _name;                                               // Set the name for display purposes

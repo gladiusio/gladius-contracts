@@ -25,7 +25,7 @@ contract Pool is AbstractBalance {
    * @param _publicKey Owner's public RSA key to encrypt against
    * @param _owner Address of the owner
    */
-  function Pool(string _publicKey, address _owner) public {
+  constructor(string _publicKey, address _owner) public {
     publicKey = _publicKey;
     owner = _owner;
   }
