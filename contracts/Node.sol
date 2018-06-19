@@ -8,7 +8,7 @@ contract Node {
 
   mapping (address=>int) status; // 0 = not available, 1 = approved, 2 = rejected, 3 = pending
 
-  function Node(address _owner) public {
+  constructor(address _owner) public {
     owner = _owner;
   }
 
@@ -33,9 +33,8 @@ contract Node {
   * Apply to be a node of a pool
   *
   * @param _pool address of pool you are applying to
-  * @param _data hello
   */
- function applyToPool(address _pool, string _data) public {
+ function applyToPool(address _pool) public {
    require(msg.sender == owner);
    require(status[_pool] == 0);
 
