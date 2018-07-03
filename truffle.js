@@ -1,8 +1,13 @@
 let HDWalletProvider = require('truffle-hdwallet-provider')
-let auth = require('./auth.json')
+let auth, infura_apikey, mnemonic
+try {
+    auth = require('./auth.json')
+    infura_apikey = auth.infuraKey
+    mnemonic = auth.mnemonic
+} catch(e){
+    console.warn("Could not load auth.json file, continuing without those credentials")
+}
 
-let infura_apikey = auth.infuraKey
-let mnemonic = auth.mnemonic
 
 module.exports = {
     networks: {
@@ -10,6 +15,11 @@ module.exports = {
             host: "localhost",
             port: 7545,
             network_id: "*" // Match any network id
+        },
+        docker: {
+            host: "ganache",
+            port: 6545,
+            network_id: "*"
         },
         truffle: {
           host: "localhost",
@@ -22,7 +32,7 @@ module.exports = {
             network_id: "*"
         },
         ropsten: {
-          provider: new HDWalletProvider(mnemonic, "https://ropsten.infura.io/"+infura_apikey),
+          provider: () => auth ? new HDWalletProvider(mnemonic, "https://ropsten.infura.io/"+infura_apikey): null,
           network_id: 3,
           gas: 4700000
         },
