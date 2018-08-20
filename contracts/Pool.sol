@@ -7,10 +7,10 @@ import "./AbstractBalance.sol";
 
 contract Pool is AbstractBalance {
   string public publicKey;                           //a public RSA key to encrypt against
-  string public data;
-  string public publicData;
 
   address private owner;                             //msg.sender = marketplace; therefore we need to pass in an owner manually
+  address[] public nodeOwners;
+  address[] public clientOwners;
   address[] private client_list;                     //list of client proposals
   address[] private node_list;                       //list of node proposals
 
@@ -25,21 +25,9 @@ contract Pool is AbstractBalance {
    * @param _publicKey Owner's public RSA key to encrypt against
    * @param _owner Address of the owner
    */
-  function Pool(string _publicKey, address _owner) public {
+  constructor(string _publicKey, address _owner) public {
     publicKey = _publicKey;
     owner = _owner;
-    data = '';
-    publicData = '';
-  }
-
-  function setData(string _data) external {
-    require(msg.sender == owner);
-    data = _data;
-  }
-
-  function setPublicData(string _publicData) external {
-    require(msg.sender == owner);
-    publicData = _publicData;
   }
 
   /**
@@ -156,6 +144,14 @@ contract Pool is AbstractBalance {
     return node_list;
   }
 
+  function getNodeOwnerList() public view returns(address[]) {
+    return nodeOwners;
+  }
+
+  function getClientOwnerList() public view returns(address[]) {
+    return clientOwners;
+  }
+
   function getClientList() public view returns(address[]) {
     return client_list;
   }
@@ -170,6 +166,7 @@ contract Pool is AbstractBalance {
     require(_newNode.getStatus(address(this)) == 3); //make sure the node has applied to this pool
 
     node_list.push(msg.sender);
+    nodeOwners.push(_newNode.getOwner());
     nodes[msg.sender] = _newNode;
   }
 
@@ -183,6 +180,7 @@ contract Pool is AbstractBalance {
     require(_newClient.getStatus(address(this)) == 3); //make sure the client has applied to this pool
 
     client_list.push(msg.sender);
+    clientOwners.push(_newClient.getOwner());
     clients[msg.sender] = _newClient;
   }
 

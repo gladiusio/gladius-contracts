@@ -33,12 +33,20 @@ contract('Pool', async function(accounts) {
 
     it('Node and client added to list', async function() {
       await nFactory.createNode({from:nodeAddress1})
-      let _node = await nFactory.getNodeAddress.call({from:nodeAddress1})
-      let node = await Node.at(_node);
+      let _node1 = await nFactory.getNodeAddress.call({from:nodeAddress1})
+      let node1 = await Node.at(_node1);
+
+      await nFactory.createNode({from:nodeAddress2})
+      let _node2 = await nFactory.getNodeAddress.call({from:nodeAddress2})
+      let node2 = await Node.at(_node2);
 
       await cFactory.createClient({from:clientAddress1})
-      let _client = await cFactory.getClientAddress.call({from:clientAddress1})
-      let client = await Client.at(_client);
+      let _client1 = await cFactory.getClientAddress.call({from:clientAddress1})
+      let client1 = await Client.at(_client1);
+
+      await cFactory.createClient({from:clientAddress2})
+      let _client2 = await cFactory.getClientAddress.call({from:clientAddress2})
+      let client2 = await Client.at(_client2);
 
       await market.createPool("TEST_KEY2", {from: owner})
       await market.createPool("TEST_KEY3", {from: owner})
@@ -46,51 +54,23 @@ contract('Pool', async function(accounts) {
       let plist = await market.getAllPools.call()
       let pool = Pool.at(plist[0])
 
-      await node.applyToPool.sendTransaction(plist[0], "celo-node1", {from: nodeAddress1})
-      await client.applyToPool.sendTransaction(plist[0], "celo-client1", {from: clientAddress1})
-
-      let data = await node.getPoolData.call(plist[0])
+      await node1.applyToPool.sendTransaction(plist[0], {from: nodeAddress1})
+      await node2.applyToPool.sendTransaction(plist[0], {from: nodeAddress2})
+      await client1.applyToPool.sendTransaction(plist[0], {from: clientAddress1})
+      await client2.applyToPool.sendTransaction(plist[0], {from: clientAddress2})
 
       let nodeList = await pool.getNodeList.call()
       let clientList = await pool.getClientList.call()
 
-      assert.equal(nodeList[0], node.address, 'Node applicant is added to list')
-      assert.equal(clientList[0], client.address, 'Client applicant is added to list')
-    })
-
-    it('Get node and client information', async function() {
-      let plist = await market.getAllPools.call()
-      let pool = Pool.at(plist[0])
-
-      await nFactory.createNode({from:nodeAddress2})
-      let _node = await nFactory.getNodeAddress.call({from:nodeAddress2})
-      let node = await Node.at(_node);
-      await node.setData.sendTransaction("celo-node2", {from:nodeAddress2})
-
-      await cFactory.createClient({from:clientAddress2})
-      let _client = await cFactory.getClientAddress.call({from:clientAddress2})
-      let client = await Client.at(_client);
-      await client.setData.sendTransaction("celo-client2", {from:clientAddress2})
-
-      await node.applyToPool(plist[0], "celo-node2", {from: nodeAddress2})
-      await client.applyToPool(plist[0], "celo-client2", {from: clientAddress2})
-
-      let nodeData = await node.getPoolData.call(plist[0])
-      let clientData = await client.getPoolData.call(plist[0])
-
-      console.log(nodeData)
-
-      let count = await nFactory.getNodeCount.call();
-
-      assert.equal(nodeData, "celo-node2", 'Able to get node data')
-      assert.equal(clientData, "celo-client2", 'Able to get client data')
+      assert.equal(nodeList[0], node1.address, 'Node applicant is added to list')
+      assert.equal(clientList[1], client2.address, 'Client applicant is added to list')
     })
 
     it('Get node and client lists', async function() {
       let plist = await market.getAllPools.call()
       let pool = Pool.at(plist[0])
 
-      //2 clients and 2 nodes applied for pool in the previous tests
+      // 1 client and 1 node applied for pool in the previous tests
 
       let nodeList   = await pool.getNodeList.call()
       let clientList = await pool.getClientList.call()
@@ -105,8 +85,8 @@ contract('Pool', async function(accounts) {
       let nodeList   = await pool.getNodeList.call()
       let clientList = await pool.getClientList.call()
 
-      pool.acceptNode.sendTransaction(nodeList[0], {from:owner})
-      pool.acceptClient.sendTransaction(clientList[0], {from:owner})
+      await pool.acceptNode.sendTransaction(nodeList[0], {from:owner})
+      await pool.acceptClient.sendTransaction(clientList[0], {from:owner})
 
       let _node = await nFactory.getNodeAddress.call({from:nodeAddress1})
       let node = await Node.at(_node)
@@ -127,8 +107,8 @@ contract('Pool', async function(accounts) {
       let nodeList   = await pool.getNodeList.call()
       let clientList = await pool.getClientList.call()
 
-      pool.rejectNode.sendTransaction(nodeList[1], {from:owner})
-      pool.rejectClient.sendTransaction(clientList[1], {from:owner})
+      await pool.rejectNode.sendTransaction(nodeList[1], {from:owner})
+      await pool.rejectClient.sendTransaction(clientList[1], {from:owner})
 
       let _node = await nFactory.getNodeAddress.call({from:nodeAddress2})
       let node = await Node.at(_node)
@@ -141,6 +121,26 @@ contract('Pool', async function(accounts) {
 
       assert.equal(nodeStatus.toNumber(), 2, 'Nodes being added to count')
       assert.equal(clientStatus.toNumber(), 2, 'Clients being added to count')
+    })
+
+    it('Records all Node owners', async function() {
+      let plist = await market.getAllPools.call()
+      let pool = Pool.at(plist[0])
+      let nodeList = await pool.getNodeList.call()
+      let nodeOwnersList = await pool.getNodeOwnerList.call()
+      assert.equal(nodeList.length, nodeOwnersList.length, 'Nodes being added to owners list')
+      assert.equal(nodeOwnersList[0], accounts[1], 'Nodes being added to owners list')
+      assert.equal(nodeOwnersList[1], accounts[2], 'Nodes being added to owners list')
+    })
+
+    it('Records all Client owners', async function() {
+      let plist = await market.getAllPools.call()
+      let pool = Pool.at(plist[0])
+      let clientList = await pool.getClientList.call()
+      let clientOwnersList = await pool.getClientOwnerList.call()
+      assert.equal(clientList.length, clientOwnersList.length, 'Clients being added to owners list')
+      assert.equal(clientOwnersList[0], accounts[5], 'Clients being added to owners list')
+      assert.equal(clientOwnersList[1], accounts[6], 'Clients being added to owners list')
     })
   })
 })
