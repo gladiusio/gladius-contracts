@@ -26,7 +26,11 @@ contract('Pool', async function(accounts) {
       await market.createPool("TEST_KEY1", {from: owner})
 
       let plist = await market.getAllPools.call();
-      let poolOwner = await market.poolToOwner(plist[0]);
+
+      for (let i = 0; i < plist.length; i++) {
+        let poolOperator = await market.poolToOwner(plist[i]);
+      }
+      // let poolOwner = await market.poolToOwner(plist[0]);
 
       assert.equal(poolOwner, owner, 'Pool\'s owner is not the creator of the market')
     })
