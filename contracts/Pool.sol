@@ -1,12 +1,8 @@
 pragma solidity ^0.4.19;
 
-//ALL DATA VARIABLES ARE SUBJECT TO CHANGE (STC)
-
 contract Pool {
 
   address public owner;
-  address[] public nodes;
-  address[] public clients;
   address[] public masterNodes;
 
   string public seedNode;
@@ -23,12 +19,51 @@ contract Pool {
     owner = _owner;
   }
 
-  function getNodes() public view returns(address[]) {
-    return nodes;
+  function getOwner() public view returns(address) {
+    return owner;
   }
 
-  function getClients() public view returns(address[]) {
-    return clients;
+  function getMasterNodes() public view returns(address[]) {
+    return masterNodes;
+  }
+
+  function getSeedNode() public view returns(string) {
+    return seedNode;
+  }
+
+  function getData() public view returns(string) {
+    return data;
+  }
+
+  /**
+   * Change the owner
+   *
+   * @param _owner New owner
+   */
+  function changeOwner(address _owner) public {
+    require(msg.sender == owner);
+    owner = _owner;
+  }
+
+
+  /**
+   * Set the pool data
+   *
+   * @param _data new pool data
+   */
+  function setData(string _data) public {
+    require(msg.sender == owner);
+    data = _data;
+  }
+
+  /**
+   * Set the seed node
+   *
+   * @param _node New seed node
+   */
+  function setSeedNode(string _node) public {
+    require(msg.sender == owner);
+    seedNode = _node;
   }
 
   /**
@@ -39,35 +74,5 @@ contract Pool {
   function addMasterNode(address _node) public {
     require(msg.sender == owner);
     masterNodes.push(_node);
-  }
-
-  /**
-   * Add a node to the list of master nodes
-   *
-   * @param _node Node to add to the list
-   */
-  function addMasterNode(address _node) public {
-    require(msg.sender == owner);
-    masterNodes.push(_node);
-  }
-
-  /**
-   * Add a node to the list of nodes
-   *
-   * @param _node Node to add to the list
-   */
-  function addNode(address _node) public {
-    require(msg.sender == owner);
-    nodes.push(_node);
-  }
-
-  /**
-   * Add a client to the list of clients
-   *
-   * @param _node Node to add to the list
-   */
-  function addClient() external {
-    require(msg.sender == owner);
-    clients.push(client);
   }
 }
