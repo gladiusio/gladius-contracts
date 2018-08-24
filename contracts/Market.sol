@@ -85,6 +85,16 @@ contract Market {
   }
 
   /**
+   * Change the owner
+   *
+   * @param _owner New owner
+   */
+  function changeOwner(address _owner) public {
+    require(msg.sender == owner);
+    owner = _owner;
+  }
+
+  /**
   * Set pool data
   *
   * @param _data Pool data

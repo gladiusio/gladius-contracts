@@ -7,6 +7,7 @@ contract Pool {
 
   string public seedNode;
   string public data;
+  string public url;
 
 
   /**
@@ -35,6 +36,10 @@ contract Pool {
     return data;
   }
 
+  function getUrl() public view returns(string) {
+    return url;
+  }
+
   /**
    * Change the owner
    *
@@ -54,6 +59,16 @@ contract Pool {
   function setData(string _data) public {
     require(msg.sender == owner);
     data = _data;
+  }
+
+  /**
+   * Set the url data
+   *
+   * @param _url new url
+   */
+  function setUrl(string _url) public {
+    require(msg.sender == owner);
+    url = _url;
   }
 
   /**
