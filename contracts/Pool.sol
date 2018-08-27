@@ -1,9 +1,44 @@
 pragma solidity ^0.4.19;
 
+contract PoolFactory {
+
+  mapping(address => Pool[]) public ownerToPools;       // Owner to their pool(s)
+  mapping(address => address) public poolToOwner;       // Pool to their Owner
+  address[] public allPools;                            // All pools
+
+  /**
+  * Create a new pool.
+  *
+  * Instantiate a new Pool and set the sender as the owner
+  * @return address Address to the new pool
+  */
+  function createPool(address _owner) public returns(address) {
+    Pool pool = new Pool(_owner);
+
+    ownerToPools[_owner].push(pool);
+    poolToOwner[address(pool)] = _owner;
+    allPools.push(address(pool));
+
+    return address(pool);
+  }
+
+  function ownerToPools(address _owner) public view returns(Pool[]) {
+      return ownerToPools[_owner];
+  }
+
+   function poolToOwner(address _pool) public view returns(address) {
+      return poolToOwner[_pool];
+  }
+
+   function getAllPools() public view returns(address[]) {
+      return allPools;
+  }
+}
+
 contract Pool {
 
+  address [] public masterNodes;
   address public owner;
-  address[] public masterNodes;
 
   string public seedNode;
   string public data;

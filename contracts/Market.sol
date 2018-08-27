@@ -1,16 +1,23 @@
 pragma solidity ^0.4.19;
 
-import "./Pool.sol";
+contract Pool {
+  function getOwner() public view returns(address);
+}
+
+contract PoolFactory {
+  function createPool(address _owner) public returns(address);
+  function ownerToPools(address _owner) public view returns(Pool[]);
+  function poolToOwner(address _pool) public view returns(address);
+  function getAllPools() public view returns(address[]);
+}
 
 contract Market {
   mapping(address => Pool[]) public marketPoolOwners;   // Owners of pools in the marketplace
-  mapping(address => Pool[]) public poolOwners;         // Owners of all the pools
-  mapping(address => address) public poolToOwner;       // Pool to Owner
 
-  address[] public allPoolsList;                        // Array of all pools
   address[] public marketPoolsList;                     // Array of all pools in the marketplace
 
   address public owner;                                 // Owner of the market
+  PoolFactory poolFactory;
 
   string public data;
 
@@ -19,8 +26,9 @@ contract Market {
    *
    * @param _owner Owners address
    */
-  constructor(address _owner) public {
+  constructor(address _owner, address _poolFactory) public {
     owner = _owner;
+    poolFactory = PoolFactory(_poolFactory);
   }
 
   /**
@@ -30,16 +38,14 @@ contract Market {
    * @return address Address to the new Pool
    */
    function createPool() public returns(address) {
-     Pool newPool = new Pool(msg.sender);
-     poolOwners[msg.sender].push(newPool);
-     allPoolsList.push(newPool);
-     poolToOwner[newPool] = msg.sender;
+     address poolAddress = poolFactory.createPool(msg.sender);
+     Pool newPool = Pool(poolAddress);
 
      return newPool;
    }
 
    function getAllPools() public view returns (address[]) {
-     return allPoolsList;
+     return poolFactory.getAllPools();
    }
 
    function getMarketPools() public view returns (address[]) {
@@ -54,6 +60,10 @@ contract Market {
      return data;
    }
 
+   function getPoolFactory() public view returns (address) {
+     return address(poolFactory);
+   }
+
   /**
    * List out pools owned by given address
    *
@@ -61,7 +71,7 @@ contract Market {
    * @return Pool[] List of Pools owned by _ownerAddress
    */
   function getOwnerAllPools(address _ownerAddress) public view returns (Pool[]) {
-    return poolOwners[_ownerAddress];
+    return poolFactory.ownerToPools(_ownerAddress);
   }
 
   /**
@@ -81,7 +91,7 @@ contract Market {
   * @return Owner of _pool
   */
   function getPoolOwner(address _pool) public view returns (address) {
-    return poolToOwner[_pool];
+    return poolFactory.poolToOwner(_pool);
   }
 
   /**
@@ -102,6 +112,16 @@ contract Market {
   function setData(string _data) public {
     require(msg.sender == owner);
     data = _data;
+  }
+
+  /**
+  * Change pool factory
+  *
+  * @param _factory Pool address
+  */
+  function changePoolFactory(address _factory) public {
+    require(msg.sender == owner);
+    poolFactory = PoolFactory(_factory);
   }
 
   /**
