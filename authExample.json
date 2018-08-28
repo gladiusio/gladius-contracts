@@ -1,0 +1,8 @@
+{
+  "infuraKey":"123fwfxftweTEst",
+  "mnemonic":{
+    "mainnet": "hope physical like topic cradle tennis acid kite metal pumpkin either cube",
+    "ropsten": "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat",
+    "other": "make sure to rename this file to auth.json!"
+  }
+}

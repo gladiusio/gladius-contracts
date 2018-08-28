@@ -1,8 +1,8 @@
 pragma solidity ^0.4.19;
 
-contract PoolFactory {
+contract PoolFactoryTest {
 
-    mapping(address => Pool[]) public ownerToPools;       // Owner to their pool(s)
+    mapping(address => PoolTest[]) public ownerToPools;       // Owner to their pool(s)
     mapping(address => address) public poolToOwner;       // Pool to their Owner
     address[] public allPools;                            // All pools
 
@@ -13,7 +13,7 @@ contract PoolFactory {
     * @return address Address to the new pool
     */
     function createPool(address _owner) public returns(address) {
-        Pool pool = new Pool(_owner);
+        PoolTest pool = new PoolTest(_owner);
 
         ownerToPools[_owner].push(pool);
         poolToOwner[address(pool)] = _owner;
@@ -22,7 +22,7 @@ contract PoolFactory {
         return address(pool);
     }
 
-    function ownerToPools(address _owner) public view returns(Pool[]) {
+    function ownerToPools(address _owner) public view returns(PoolTest[]) {
         return ownerToPools[_owner];
     }
 
@@ -35,7 +35,7 @@ contract PoolFactory {
     }
 }
 
-contract Pool {
+contract PoolTest {
 
     address[] public masterNodes;
     address public owner;
