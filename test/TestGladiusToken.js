@@ -1,5 +1,3 @@
-let Pool = artifacts.require('Pool')
-let Market = artifacts.require('Market')
 let GladiusToken = artifacts.require('GladiusToken')
 
 contract('GladiusToken', function(accounts) {

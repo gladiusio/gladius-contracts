@@ -1,9 +1,10 @@
-let PoolContract = artifacts.require('Pool')
-let MarketContract = artifacts.require('Market')
-let GladiusToken = artifacts.require('GladiusToken')
+let Pool = artifacts.require('Pool')
+let PoolFactory = artifacts.require('PoolFactory')
+let Market = artifacts.require('Market')
 
 module.exports = function(deployer, network, accounts) {
-  deployer.deploy(GladiusToken, 10000, 'Gladius Token', 'GLA').then( ()=> {
-    return deployer.deploy(MarketContract, accounts[0], GladiusToken.address, 10, 10)
+  deployer.deploy(PoolFactory, accounts[0]);
+  deployer.deploy(PoolFactory, accounts[0]).then(function() {
+    return deployer.deploy(Market, accounts[0], PoolFactory.address)
   })
 }
