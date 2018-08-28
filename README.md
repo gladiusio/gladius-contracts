@@ -1,6 +1,6 @@
 # Gladius Marketplace Backend
 
-[![Build Status](https://travis-ci.org/gladiusio/gladius-contracts.svg?branch=master)](https://travis-ci.org/gladiusio/gladius-contracts)
+[![Build Status](https://travis-ci.com/gladiusio/gladius-contracts.svg?branch=master)](https://travis-ci.com/gladiusio/gladius-contracts)
 
 ## Installation & Testing
 
