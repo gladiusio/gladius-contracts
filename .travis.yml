@@ -1,12 +1,10 @@
 language: node_js
 
 node_js:
-  - "8.9.1"
+  - "8.11.4"
 
 before_install:
-  - npm install -g truffle
-  - npm install -g ganache-cli
+  - npm install
 
 script:
-  - ganache-cli > ./ganache-cli.log 2>&1 &
-  - truffle test --network travisci
+  - npm run test
