@@ -4,7 +4,7 @@ let Market = artifacts.require('Market')
 
 module.exports = function(deployer, network, accounts) {
   // I only need this to test switching out contracts
-  if (network == "travisci") {
+  if (network == "truffle") {
     deployer.deploy(PoolFactory2, accounts[0]);
   }
 

@@ -1,6 +1,5 @@
 let Pool = artifacts.require('Pool')
 let Market = artifacts.require('Market')
-let GladiusToken = artifacts.require('GladiusToken')
 
 contract('Pool', async function(accounts) {
   // Accounts
@@ -70,6 +69,5 @@ contract('Pool', async function(accounts) {
 
       assert.equal(data, "data goes here","Data changed or not set")
     })
-
   })
 })

@@ -18,11 +18,9 @@
     "clean": "rm -rf build",
     "truffleCompile": "truffle compile",
     "truffleDevelop": "truffle develop",
-    "truffleTestMarket": "truffle test './test/TestMarket.js' --network truffle",
-    "truffleTestPool": "truffle test './test/TestPools.js' --network truffle",
-    "truffleTestAll": "npm-run-all --sequential truffleTestMarket truffleTestPool",
+    "truffleTest": "truffle test --network truffle",
     "truffleDeploy": "truffle deploy --network truffle",
-    "test": "npm run clean; npm-run-all -p -r truffleDevelop truffleTestAll"
+    "test": "npm run clean; npm-run-all -p -r truffleDevelop truffleTest"
   },
   "repository": {
     "type": "git",
