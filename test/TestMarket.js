@@ -1,6 +1,6 @@
-let Pool = artifacts.require('Pool')
+let PoolFactory1 = artifacts.require('PoolFactory')
+let PoolFactory2 = artifacts.require('PoolFactoryTest')
 let Market = artifacts.require('Market')
-let GladiusToken = artifacts.require('GladiusToken')
 
 contract('Market', function(accounts) {
   // Accounts
@@ -44,6 +44,17 @@ contract('Market', function(accounts) {
       assert.equal(userPools.length, 2, "User missing pools")
       assert.equal(userMarketPools.length, 1, "User missing market pools")
 
+    }) // jshint ignore:line
+
+    it('Switch the pool factory', async function() { // jshint ignore:line
+      let market = await Market.deployed()
+      let pools1 = await PoolFactory2.deployed()
+
+      await market.changePoolFactory(pools1.address, {from: owner})
+
+      let pools2 = await market.getPoolFactory()
+
+      assert.equal(pools1.address, pools2, "Market did not switch pool factories")
     }) // jshint ignore:line
 
     it('Get/Set data', async function() {

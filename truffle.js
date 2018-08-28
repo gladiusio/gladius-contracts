@@ -12,10 +12,10 @@ module.exports = {
     }
   },
   networks: {
-      development: {
-          host: "localhost",
-          port: 7545,
-          network_id: "*" // Match any network id
+      mainnet: {
+        provider: function() {return new HDWalletProvider(mnemonic.mainnet, "https://mainnet.infura.io/"+infura_apikey)},
+        gasPrice:10000000000,
+        network_id: 1
       },
       truffle: {
         host: "localhost",
@@ -23,12 +23,12 @@ module.exports = {
         network_id: "*", // Match any network id
       },
       travisci: {
-          host: "localhost",
-          port: 8545,
-          network_id: "*"
+        host: "localhost",
+        port: 8545,
+        network_id: "*"
       },
       ropsten: {
-        provider: new HDWalletProvider(mnemonic, "https://ropsten.infura.io/"+infura_apikey),
+        provider: function() {return new HDWalletProvider(mnemonic.ropsten, "https://ropsten.infura.io/"+infura_apikey)},
         network_id: 3,
         gas: 4700000
       }
