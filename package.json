@@ -16,11 +16,12 @@
   },
   "scripts": {
     "clean": "rm -rf build",
+    "testAuth": "cp ./authExample.json ./auth.json",
     "truffleCompile": "truffle compile",
     "truffleDevelop": "truffle develop",
     "truffleTest": "truffle test --network truffle",
     "truffleDeploy": "truffle deploy --network truffle",
-    "test": "npm run clean; npm-run-all -p -r truffleDevelop truffleTest"
+    "test": "npm run clean; npm run testAuth; npm-run-all -p -r truffleDevelop truffleTest"
   },
   "repository": {
     "type": "git",
