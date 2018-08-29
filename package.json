@@ -22,6 +22,7 @@
     "truffleDevelop": "truffle develop",
     "truffleTest": "truffle test --network truffle",
     "truffleDeploy": "truffle deploy --network truffle",
+    "truffleDeployMain": "truffle deploy --network mainnet",
     "test": "npm run clean; npm run testAuth; npm-run-all -p -r truffleDevelop truffleTest"
   },
   "repository": {
