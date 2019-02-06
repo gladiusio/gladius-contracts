@@ -37,12 +37,14 @@ contract PoolFactory {
 
 contract Pool {
 
-    address[] public masterNodes;
+    mapping(address => bool) public masterNodes;
+    mapping(address => bool) public approvedNodes;
+
     address public owner;
 
     string public seedNode;
     string public data;
-    string public url;
+    string public poolDomain;
 
 
     /**
@@ -59,8 +61,12 @@ contract Pool {
         return owner;
     }
 
-    function getMasterNodes() public view returns(address[]) {
-        return masterNodes;
+    function isMasterNode(address _node) public view returns(bool) {
+        return masterNodes[_node];
+    }
+
+    function isApprovedNode(address _node) public view returns(bool) {
+        return approvedNodes[_node];
     }
 
     function getSeedNode() public view returns(string) {
@@ -71,8 +77,8 @@ contract Pool {
         return data;
     }
 
-    function getUrl() public view returns(string) {
-        return url;
+    function getPoolDomain() public view returns(string) {
+        return poolDomain;
     }
 
     /**
@@ -97,13 +103,13 @@ contract Pool {
     }
 
     /**
-    * Set the url data
+    * Set the poolDomain data
     *
     * @param _url new url
     */
-    function setUrl(string _url) public {
+    function setPoolDomain(string _url) public {
         require(msg.sender == owner, "Must be owner of contract");
-        url = _url;
+        poolDomain = _url;
     }
 
     /**
@@ -123,6 +129,16 @@ contract Pool {
     */
     function addMasterNode(address _node) public {
         require(msg.sender == owner, "Must be owner of contract");
-        masterNodes.push(_node);
+        masterNodes[_node] = (true);
+    }
+
+    /**
+    * Add a node to the list of approved nodes
+    *
+    * @param _node Node to add to the list
+    */
+    function addApprovedNode(address _node) public {
+        require(msg.sender == owner, "Must be owner of contract");
+        approvedNodes[_node] = (true);
     }
 }

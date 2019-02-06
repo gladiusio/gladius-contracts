@@ -29,9 +29,9 @@ contract('Pool', async function(accounts) {
 
       }
 
-      let masternodes = await pool.getMasterNodes()
+      let masternode = await pool.isMasterNode(accounts[1])
 
-      assert.equal(masternodes.length, 1, 'Masternodes not added to list')
+      assert.equal(masternode, true, 'Masternode not added to list')
     })
 
     it('Get/Set seed node', async function() {
@@ -68,6 +68,24 @@ contract('Pool', async function(accounts) {
       let data = await pool.getData()
 
       assert.equal(data, "data goes here","Data changed or not set")
+    })
+
+    it('Get/Set Pool Domain', async function() {
+      let market = await Market.deployed()
+      let allPools = await market.getAllPools.call();
+      let pool = await Pool.at(allPools[0])
+
+      await pool.setPoolDomain("0x0.pool.gladius.io", {from:owner})
+
+      try {
+        await pool.setPoolDomain("data doesnt go here", {from:accounts[1]})
+      } catch (error) {
+
+      }
+
+      let data = await pool.getPoolDomain()
+
+      assert.equal(data, "0x0.pool.gladius.io","poolDomain changed or not set")
     })
   })
 })
