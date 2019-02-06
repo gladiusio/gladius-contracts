@@ -129,7 +129,7 @@ contract Pool {
     */
     function addMasterNode(address _node) public {
         require(msg.sender == owner, "Must be owner of contract");
-        masterNodes[_node] = (true);
+        masterNodes[_node] = true;
     }
 
     /**
@@ -139,6 +139,30 @@ contract Pool {
     */
     function addApprovedNode(address _node) public {
         require(msg.sender == owner, "Must be owner of contract");
-        approvedNodes[_node] = (true);
+        approvedNodes[_node] = true;
+    }
+
+    /**
+    * Remove a master node to the list of master nodes
+    *
+    * @param _node Node to remove from the list
+    */
+    function removeMasterNode(address _node) public {
+        require(msg.sender == owner, "Must be owner of contract");
+        if (masterNodes[_node]) {
+          masterNodes[_node] = false;
+        }
+    }
+
+    /**
+    * Remove a node to the list of approved nodes
+    *
+    * @param _node Node to remove from the list
+    */
+    function removeApprovedNode(address _node) public {
+        require(msg.sender == owner, "Must be owner of contract");
+        if (approvedNodes[_node]) {
+          approvedNodes[_node] = false;
+        }
     }
 }

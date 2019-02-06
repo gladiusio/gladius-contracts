@@ -22,6 +22,7 @@ contract('Pool', async function(accounts) {
       let pool = await Pool.at(allPools[0])
 
       await pool.addMasterNode(accounts[1], {from:owner})
+      await pool.addMasterNode(accounts[2], {from:owner})
 
       try{
         await pool.addMasterNode(accounts[2], {from:accounts[1]})
@@ -30,8 +31,16 @@ contract('Pool', async function(accounts) {
       }
 
       let masternode = await pool.isMasterNode(accounts[1])
+      let masternode2 = await pool.isMasterNode(accounts[2])
 
       assert.equal(masternode, true, 'Masternode not added to list')
+      assert.equal(masternode2, true, 'Masternode2 not added to list')
+
+      await pool.removeMasterNode(accounts[2], {from:owner})
+
+      masternode = await pool.isMasterNode(accounts[2])
+
+      assert.equal(masternode, false, 'Masternode not removed to list')
     })
 
     it('Get/Set seed node', async function() {
