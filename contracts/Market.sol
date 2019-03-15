@@ -1,15 +1,6 @@
-pragma solidity ^0.4.19;
+pragma solidity >=0.4.21 <0.6.0;
 
-contract Pool {
-    function getOwner() public view returns(address);
-}
-
-contract PoolFactory {
-    function createPool(address _owner) public returns(address);
-    function ownerToPools(address _owner) public view returns(Pool[]);
-    function poolToOwner(address _pool) public view returns(address);
-    function getAllPools() public view returns(address[]);
-}
+import "./Pool.sol";
 
 contract Market {
     mapping(address => Pool[]) public marketPoolOwners;   // Owners of pools in the marketplace
@@ -43,14 +34,14 @@ contract Market {
         address poolAddress = poolFactory.createPool(msg.sender);
         Pool newPool = Pool(poolAddress);
 
-        return newPool;
+        return address(newPool);
     }
 
-    function getAllPools() public view returns (address[]) {
+    function getAllPools() public view returns (address[] memory) {
         return poolFactory.getAllPools();
     }
 
-    function getMarketPools() public view returns (address[]) {
+    function getMarketPools() public view returns (address[] memory) {
         return marketPoolsList;
     }
 
@@ -58,7 +49,7 @@ contract Market {
         return owner;
     }
 
-    function getData() public view returns (string) {
+    function getData() public view returns (string memory) {
         return data;
     }
 
@@ -72,8 +63,8 @@ contract Market {
     * @param _ownerAddress Owner of pools
     * @return Pool[] List of Pools owned by _ownerAddress
     */
-    function getOwnerAllPools(address _ownerAddress) public view returns (Pool[]) {
-        return poolFactory.ownerToPools(_ownerAddress);
+    function getOwnerAllPools(address _ownerAddress) public view returns (Pool[] memory) {
+        return poolFactory.getOwnedPool(_ownerAddress);
     }
 
     /**
@@ -82,7 +73,7 @@ contract Market {
     * @param _ownerAddress Owner of pools
     * @return Pool[] List of Pools owned by _ownerAddress that are also in the marketplace
     */
-    function getOwnerMarketPools(address _ownerAddress) public view returns (Pool[]) {
+    function getOwnerMarketPools(address _ownerAddress) public view returns (Pool[] memory) {
         return marketPoolOwners[_ownerAddress];
     }
 
@@ -93,7 +84,7 @@ contract Market {
     * @return Owner of _pool
     */
     function getPoolOwner(address _pool) public view returns (address) {
-        return poolFactory.poolToOwner(_pool);
+        return poolFactory.getPoolOwner(_pool);
     }
 
     /**
@@ -111,7 +102,7 @@ contract Market {
     *
     * @param _data Pool data
     */
-    function setData(string _data) public {
+    function setData(string memory _data) public {
         require(msg.sender == owner, enforceOwner);
         data = _data;
     }
