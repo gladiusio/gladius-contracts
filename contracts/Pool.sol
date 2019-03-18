@@ -43,6 +43,7 @@ contract Pool {
     string public seedNode;
     string public data;
     string public poolDomain;
+    string public cdnDomain;
 
 
     /**
@@ -79,6 +80,10 @@ contract Pool {
         return poolDomain;
     }
 
+    function getCDNDomain() public view returns(string memory) {
+        return cdnDomain;
+    }
+
     /**
     * Change the owner
     *
@@ -108,6 +113,16 @@ contract Pool {
     function setPoolDomain(string memory _url) public {
         require(msg.sender == owner, "Must be owner of contract");
         poolDomain = _url;
+    }
+
+    /**
+    * Set the cdnDomain data
+    *
+    * @param _url new url
+    */
+    function setCDNDomain(string memory _url) public {
+        require(msg.sender == owner, "Must be owner of contract");
+        cdnDomain = _url;
     }
 
     /**
