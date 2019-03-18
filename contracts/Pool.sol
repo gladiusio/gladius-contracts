@@ -36,7 +36,11 @@ contract PoolFactory {
 
 contract Pool {
     mapping(address => bool) public masterNodes;
+    address[] public masterNodesList;
+
     mapping(address => bool) public approvedNodes;
+    address[] public approvedNodesList;
+
 
     address public owner;
 
@@ -66,6 +70,15 @@ contract Pool {
 
     function isApprovedNode(address _node) public view returns(bool) {
         return approvedNodes[_node];
+    }
+
+    function getAllApprovedNodes() public view returns(address[] memory) {
+        return approvedNodesList;
+    }
+
+
+    function getAllMasterNodes() public view returns(address[] memory) {
+        return masterNodesList;
     }
 
     function getSeedNode() public view returns(string memory) {
@@ -143,6 +156,7 @@ contract Pool {
     function addMasterNode(address _node) public {
         require(msg.sender == owner, "Must be owner of contract");
         masterNodes[_node] = true;
+        masterNodesList.push(_node);
     }
 
     /**
@@ -153,6 +167,7 @@ contract Pool {
     function addApprovedNode(address _node) public {
         require(msg.sender == owner, "Must be owner of contract");
         approvedNodes[_node] = true;
+        approvedNodesList.push(_node);
     }
 
     /**
