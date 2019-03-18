@@ -1,7 +1,6 @@
-pragma solidity ^0.4.19;
+pragma solidity >=0.4.21 <0.6.0;
 
 contract PoolFactory {
-
     mapping(address => Pool[]) public ownerToPools;       // Owner to their pool(s)
     mapping(address => address) public poolToOwner;       // Pool to their Owner
     address[] public allPools;                            // All pools
@@ -22,21 +21,20 @@ contract PoolFactory {
         return address(pool);
     }
 
-    function ownerToPools(address _owner) public view returns(Pool[]) {
+    function getOwnedPool(address _owner) public view returns(Pool[] memory) {
         return ownerToPools[_owner];
     }
 
-    function poolToOwner(address _pool) public view returns(address) {
+    function getPoolOwner(address _pool) public view returns(address) {
         return poolToOwner[_pool];
     }
 
-    function getAllPools() public view returns(address[]) {
+    function getAllPools() public view returns(address[] memory) {
         return allPools;
     }
 }
 
 contract Pool {
-
     mapping(address => bool) public masterNodes;
     mapping(address => bool) public approvedNodes;
 
@@ -69,15 +67,15 @@ contract Pool {
         return approvedNodes[_node];
     }
 
-    function getSeedNode() public view returns(string) {
+    function getSeedNode() public view returns(string memory) {
         return seedNode;
     }
 
-    function getData() public view returns(string) {
+    function getData() public view returns(string memory) {
         return data;
     }
 
-    function getPoolDomain() public view returns(string) {
+    function getPoolDomain() public view returns(string memory) {
         return poolDomain;
     }
 
@@ -97,7 +95,7 @@ contract Pool {
     *
     * @param _data new pool data
     */
-    function setData(string _data) public {
+    function setData(string memory _data) public {
         require(msg.sender == owner, "Must be owner of contract");
         data = _data;
     }
@@ -107,7 +105,7 @@ contract Pool {
     *
     * @param _url new url
     */
-    function setPoolDomain(string _url) public {
+    function setPoolDomain(string memory _url) public {
         require(msg.sender == owner, "Must be owner of contract");
         poolDomain = _url;
     }
@@ -117,7 +115,7 @@ contract Pool {
     *
     * @param _node New seed node
     */
-    function setSeedNode(string _node) public {
+    function setSeedNode(string memory _node) public {
         require(msg.sender == owner, "Must be owner of contract");
         seedNode = _node;
     }
