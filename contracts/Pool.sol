@@ -48,6 +48,7 @@ contract Pool {
     string public data;
     string public poolDomain;
     string public cdnDomain;
+    string public certificateBundle;
 
 
     /**
@@ -76,7 +77,6 @@ contract Pool {
         return approvedNodesList;
     }
 
-
     function getAllMasterNodes() public view returns(address[] memory) {
         return masterNodesList;
     }
@@ -93,6 +93,10 @@ contract Pool {
         return poolDomain;
     }
 
+    function getCertificateBundle() public view returns(string memory) {
+        return certificateBundle;
+    }
+
     function getCDNDomain() public view returns(string memory) {
         return cdnDomain;
     }
@@ -107,7 +111,6 @@ contract Pool {
         owner = _owner;
     }
 
-
     /**
     * Set the pool data
     *
@@ -116,6 +119,16 @@ contract Pool {
     function setData(string memory _data) public {
         require(msg.sender == owner, "Must be owner of contract");
         data = _data;
+    }
+
+    /**
+    * Set the certiciate bundle link
+    *
+    * @param _url new cdn certificate link
+    */
+    function setCertificateBundle(string memory _url) public {
+        require(msg.sender == owner, "Must be owner of contract");
+        certificateBundle = _url;
     }
 
     /**
