@@ -20,12 +20,8 @@
     "clean": "rm -rf build",
     "testAuth": "if !(exists ./auth.json); then cp ./authExample.json ./auth.json; fi",
     "truffleCompile": "truffle compile",
-    "truffleDevelop": "truffle develop",
-    "truffleTest": "truffle test --network truffle",
-    "truffleDeploy": "truffle deploy --network truffle",
-    "truffleDeployMain": "truffle deploy --network mainnet",
     "test": "npm run clean; npm run testAuth; npm-run-all -p -r truffleDevelop truffleTest",
-    "build-go": "truffle compile; abigen --abi ./build/contracts/Market.json --pkg contracts --type MarketHandler --out go/contracts/market.go"
+    "build-go": "abigen -sol contracts/Market.sol --pkg contracts --out go/contracts/contracts.go"
   },
   "repository": {
     "type": "git",
