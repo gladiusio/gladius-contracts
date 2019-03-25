@@ -46,7 +46,7 @@ func PoolCreate(bm *backend.Manager) func(c *ishell.Context) {
 				return
 			}
 
-			pools, err := market.GetOwnerAllPools(&bind.CallOpts{From: account.Address}, account.Address)
+			pools, err := market.GetOwnerAllPools(&bind.CallOpts{From: account.Address, Pending: true}, account.Address)
 			if err != nil {
 				c.Err(fmt.Errorf("could not get owned pools from marketplace: %v", err))
 				return
@@ -89,7 +89,7 @@ func PoolList(bm *backend.Manager) func(c *ishell.Context) {
 		}
 		c.Println("Your pools:")
 		for _, p := range pools {
-			c.Println(p.String())
+			c.Println(" - " + p.String())
 		}
 	}
 }
@@ -104,7 +104,7 @@ func PoolUpdate(bm *backend.Manager) func(c *ishell.Context) {
 
 		c.Print("This operation will cost Ether, are you sure you want to update pool information? (y/n): ")
 		answer := c.ReadLine()
-		if strings.EqualFold(answer, "n") || strings.EqualFold(answer, "no") {
+		if !(strings.EqualFold(answer, "y") || strings.EqualFold(answer, "yes")) {
 			return
 		}
 

@@ -28,7 +28,7 @@ func marketPicker(bm *backend.Manager, c *ishell.Context) common.Address {
 	c.Print("Enter the marketplace address you want to connect to: ")
 	marketAddress := common.HexToAddress(c.ReadLine())
 	bm.SetMarketPlaceAddress(marketAddress)
-	c.Printf("Caching %s as default market\n", marketAddress.String())
+	c.Printf("Caching %s as default market (you can change this with `market connect`)\n", marketAddress.String())
 
 	return marketAddress
 
