@@ -7,17 +7,15 @@
 * `npm install`
 * `npm run test`
 
-
 ## Platform Requirements
 * Node.js, `>=7.6.0`
+* Golang `1.11+`
 
-## How to deploy to a local blockchain
-- `npm run truffleDevelop` (Terminal 1)
-- `npm run truffleDeploy` (Terminal 2)
+## Deployment
 
-## How to deploy to Main Ethereum Network
-- `npm run truffleDeployMain`
+There's an interactive CLI in the [go folder](./go) that can be used to deploy and interact with the contacts on the network of your choosing. Just run `go run main.go` in that directory, or build your own with `go build`
 
+You can also use truffle to deploy, just run: `truffle migrate --network {your_network}`
 
 ## Code Overview
 
