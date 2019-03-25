@@ -31,10 +31,7 @@ contract Market {
     * @return address Address to the new Pool
     */
     function createPool() public returns(address) {
-        address poolAddress = poolFactory.createPool(msg.sender);
-        Pool newPool = Pool(poolAddress);
-
-        return address(newPool);
+        return poolFactory.createPool(msg.sender);
     }
 
     function getAllPools() public view returns (address[] memory) {

@@ -1,33 +1,63 @@
 package main
 
 import (
-	"github.com/ethereum/go-ethereum/ethclient"
+	"fmt"
+
+	"github.com/gladiusio/gladius-contracts/go/cli/backend"
+	"github.com/gladiusio/gladius-contracts/go/cli/commands"
 	ishell "gopkg.in/abiosoft/ishell.v2"
 )
 
-// Global backend
-var backend *ethclient.Client
-
 func main() {
-
 	shell := ishell.New()
-
 	shell.Println("Gladius Contract Manager")
 	shell.Println("Start with `connect`, type `help` for more information")
 
-	shell.AddCmd(&ishell.Cmd{
+	bm := &backend.Manager{}
+
+	connectCommand := &ishell.Cmd{
 		Name: "connect",
 		Help: "Connect to Ethereum RPC",
-		Func: Connect,
-	})
+		Func: commands.Connect(bm),
+	}
 
-	shell.AddCmd(&ishell.Cmd{
+	poolCommand := &ishell.Cmd{
 		Name: "pool",
-		Help: "Connect to Ethereum RPC",
-		Func: func(c *ishell.Context) {
+		Help: "Allows creation and interaction of a pool contract",
+		Func: func(c *ishell.Context) { fmt.Println(c.Cmd.HelpText()) },
+	}
 
-		},
-	})
+	poolCreateCommand := &ishell.Cmd{
+		Name: "create",
+		Help: "Creates a pool",
+		Func: commands.PoolCreate(bm),
+	}
+
+	poolListCommand := &ishell.Cmd{
+		Name: "list",
+		Help: "Lists all pools you own",
+		Func: commands.PoolList(bm),
+	}
+
+	poolInfoCommand := &ishell.Cmd{
+		Name: "info",
+		Help: "Get's information about a specific pool",
+		Func: commands.PoolInformation(bm),
+	}
+
+	poolUpdateCommand := &ishell.Cmd{
+		Name: "update",
+		Help: "Update fields in a pool",
+		Func: commands.PoolUpdate(bm),
+	}
+
+	poolCommand.AddCmd(poolCreateCommand)
+	poolCommand.AddCmd(poolListCommand)
+	poolCommand.AddCmd(poolInfoCommand)
+	poolCommand.AddCmd(poolUpdateCommand)
+
+	shell.AddCmd(connectCommand)
+	shell.AddCmd(poolCommand)
 
 	// run shell
 	shell.Run()
