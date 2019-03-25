@@ -56,8 +56,44 @@ func main() {
 	poolCommand.AddCmd(poolInfoCommand)
 	poolCommand.AddCmd(poolUpdateCommand)
 
+	marketCommand := &ishell.Cmd{
+		Name: "market",
+		Help: "Allows creation and interaction of a market contract",
+		Func: func(c *ishell.Context) { fmt.Println(c.Cmd.HelpText()) },
+	}
+
+	marketCreate := &ishell.Cmd{
+		Name: "create",
+		Help: "Deploy a marketplace contract",
+		Func: commands.MarketCreate(bm),
+	}
+
+	marketAddPool := &ishell.Cmd{
+		Name: "add",
+		Help: "Adds a pool to the marketplace",
+		Func: commands.MarketAddPool(bm),
+	}
+
+	marketConnect := &ishell.Cmd{
+		Name: "connect",
+		Help: "Connects a default marketplace address",
+		Func: commands.MarketConnect(bm),
+	}
+
+	marketList := &ishell.Cmd{
+		Name: "list",
+		Help: "Lists all pools that have been added to the marketplace by the owner",
+		Func: commands.MarketList(bm),
+	}
+
+	marketCommand.AddCmd(marketCreate)
+	marketCommand.AddCmd(marketAddPool)
+	marketCommand.AddCmd(marketConnect)
+	marketCommand.AddCmd(marketList)
+
 	shell.AddCmd(connectCommand)
 	shell.AddCmd(poolCommand)
+	shell.AddCmd(marketCommand)
 
 	// run shell
 	shell.Run()
