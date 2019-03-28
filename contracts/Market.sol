@@ -125,7 +125,7 @@ contract Market {
         Pool p = Pool(_poolAddress);
 
         marketPoolOwners[p.getOwner()].push(p);
-        marketPoolsList.push(p.getOwner());
+        marketPoolsList.push(_poolAddress);
 
         return true;
     }
