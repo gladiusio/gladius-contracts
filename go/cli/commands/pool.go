@@ -151,6 +151,11 @@ func PoolUpdate(bm *backend.Manager) func(c *ishell.Context) {
 			"Update Pool Domain",
 			"Update CDN Domain",
 			"Update Certificate Bundle Link",
+			"Add Masternode",
+			"Add Infrastructure Node",
+			"Remove Node",
+			"Remove Masternode",
+			"Remove Infrastructure Node",
 		}, "What do you want to do?")
 
 		switch toUpdate {
@@ -194,6 +199,51 @@ func PoolUpdate(bm *backend.Manager) func(c *ishell.Context) {
 			c.Print("Enter new link: ")
 			addr := c.ReadLine()
 			tx, err := pool.SetCertificateBundle(opts, addr)
+			if err != nil {
+				c.Err(err)
+				return
+			}
+			c.Printf("Success! TX Hash: %s\n", tx.Hash().String())
+		case 5:
+			c.Print("Enter Masternode address: ")
+			node := common.HexToAddress(c.ReadLine())
+			tx, err := pool.AddMasterNode(opts, node)
+			if err != nil {
+				c.Err(err)
+				return
+			}
+			c.Printf("Success! TX Hash: %s\n", tx.Hash().String())
+		case 6:
+			c.Print("Enter Infrastructure Node address: ")
+			node := common.HexToAddress(c.ReadLine())
+			tx, err := pool.AddInfrastructureNode(opts, node)
+			if err != nil {
+				c.Err(err)
+				return
+			}
+			c.Printf("Success! TX Hash: %s\n", tx.Hash().String())
+		case 7:
+			c.Print("Node address to remove: ")
+			node := common.HexToAddress(c.ReadLine())
+			tx, err := pool.RemoveApprovedNode(opts, node)
+			if err != nil {
+				c.Err(err)
+				return
+			}
+			c.Printf("Success! TX Hash: %s\n", tx.Hash().String())
+		case 8:
+			c.Print("Masternode address to remove: ")
+			node := common.HexToAddress(c.ReadLine())
+			tx, err := pool.RemoveMasterNode(opts, node)
+			if err != nil {
+				c.Err(err)
+				return
+			}
+			c.Printf("Success! TX Hash: %s\n", tx.Hash().String())
+		case 9:
+			c.Print("Infrastructure Node address to remove: ")
+			node := common.HexToAddress(c.ReadLine())
+			tx, err := pool.RemoveInfrastructureNode(opts, node)
 			if err != nil {
 				c.Err(err)
 				return

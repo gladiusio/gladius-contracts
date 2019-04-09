@@ -41,6 +41,8 @@ contract Pool {
     mapping(address => bool) public approvedNodes;
     address[] public approvedNodesList;
 
+    mapping(address => bool) public infrastructureNodes;
+    address[] public infrastructureNodesList;
 
     address public owner;
 
@@ -73,12 +75,20 @@ contract Pool {
         return approvedNodes[_node];
     }
 
+    function isInfrastructureNode(address _node) public view returns(bool) {
+        return approvedNodes[_node];
+    }
+
     function getAllApprovedNodes() public view returns(address[] memory) {
         return approvedNodesList;
     }
 
     function getAllMasterNodes() public view returns(address[] memory) {
         return masterNodesList;
+    }
+
+    function getAllInfrastructureNodes() public view returns(address[] memory) {
+        return infrastructureNodesList;
     }
 
     function getSeedNode() public view returns(string memory) {
@@ -173,6 +183,18 @@ contract Pool {
     }
 
     /**
+    * Add an infrastructure node to the list of master nodes
+    *
+    * @param _node Node to add to the list
+    */
+    function addInfrastructureNode(address _node) public {
+        require(msg.sender == owner, "Must be owner of contract");
+        infrastructureNodes[_node] = true;
+        infrastructureNodesList.push(_node);
+    }
+
+
+    /**
     * Add a node to the list of approved nodes
     *
     * @param _node Node to add to the list
@@ -192,6 +214,18 @@ contract Pool {
         require(msg.sender == owner, "Must be owner of contract");
         if (masterNodes[_node]) {
           masterNodes[_node] = false;
+        }
+    }
+
+        /**
+    * Remove an infrastructure node to the list of master nodes
+    *
+    * @param _node Node to remove from the list
+    */
+    function removeInfrastructureNode(address _node) public {
+        require(msg.sender == owner, "Must be owner of contract");
+        if (infrastructureNodes[_node]) {
+          infrastructureNodes[_node] = false;
         }
     }
 
