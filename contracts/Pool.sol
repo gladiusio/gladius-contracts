@@ -76,7 +76,7 @@ contract Pool {
     }
 
     function isInfrastructureNode(address _node) public view returns(bool) {
-        return approvedNodes[_node];
+        return infrastructureNodes[_node];
     }
 
     function getAllApprovedNodes() public view returns(address[] memory) {
